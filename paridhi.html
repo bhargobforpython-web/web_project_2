@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BHARGOBJYOTI — Client Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ════════════════════════════════════════════════════════════
+       DESIGN TOKENS — same as homepage, do not edit
+    ════════════════════════════════════════════════════════════ */
+    :root {
+      --bg:        #0e0e0d;
+      --surface:   #161614;
+      --border:    rgba(255,255,255,0.07);
+      --text:      #e8e2d9;
+      --muted:     #7a7670;
+      --gold:      #c9a96e;
+      --gold-dim:  rgba(201,169,110,0.15);
+      --white:     #f5f0e8;
+      --radius:    4px;
+      --ease:      cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       RESET
+    ════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; }
+    button { cursor: pointer; font-family: inherit; }
+
+    /* ════════════════════════════════════════════════════════════
+       GRAIN OVERLAY — same as homepage
+    ════════════════════════════════════════════════════════════ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       HEADER — identical to homepage
+    ════════════════════════════════════════════════════════════ */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4rem;
+      height: 72px;
+      background: rgba(14,14,13,0.85);
+      backdrop-filter: blur(18px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s var(--ease);
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .logo span { color: var(--gold); }
+
+    nav { display: flex; gap: 2.5rem; align-items: center; }
+    nav a {
+      font-size: 0.78rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      position: relative;
+      transition: color 0.25s;
+    }
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 0; height: 1px;
+      background: var(--gold);
+      transition: width 0.3s var(--ease);
+    }
+    nav a:hover { color: var(--white); }
+    nav a:hover::after { width: 100%; }
+
+    .nav-cta {
+      padding: 0.45rem 1.2rem;
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      color: var(--gold) !important;
+      font-size: 0.75rem !important;
+      letter-spacing: 0.14em !important;
+      transition: background 0.25s, color 0.25s !important;
+    }
+    .nav-cta:hover { background: var(--gold); color: var(--bg) !important; }
+    .nav-cta::after { display: none !important; }
+
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      flex-direction: column;
+      gap: 5px;
+      padding: 4px;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 24px; height: 1px;
+      background: var(--text);
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       LOGIN SCREEN
+    ════════════════════════════════════════════════════════════ */
+    #loginScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+    }
+    #loginScreen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-20px);
+    }
+
+    /* decorative background for login */
+    #loginScreen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(201,169,110,0.06), transparent),
+        radial-gradient(ellipse 50% 40% at 80% 20%, rgba(201,169,110,0.04), transparent);
+      pointer-events: none;
+    }
+
+    .login-box {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3rem 3.5rem;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+      animation: loginFadeIn 0.8s var(--ease) both;
+    }
+    @keyframes loginFadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* gold top accent line */
+    .login-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .login-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.5rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 0.4rem;
+      text-align: center;
+    }
+    .login-logo span { color: var(--gold); }
+
+    .login-subtitle {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .login-divider {
+      width: 36px; height: 1px;
+      background: var(--gold);
+      margin: 0 auto 2.5rem;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin-bottom: 1.4rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.55rem;
+    }
+    .form-group input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 300;
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .form-group input::placeholder { color: var(--muted); opacity: 0.5; }
+    .form-group input:focus {
+      border-color: rgba(201,169,110,0.5);
+      background: rgba(201,169,110,0.04);
+    }
+
+    .login-btn {
+      width: 100%;
+      margin-top: 2rem;
+      padding: 0.9rem;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transition: background 0.25s, transform 0.2s;
+    }
+    .login-btn:hover { background: #d4b57e; transform: translateY(-2px); }
+    .login-btn:active { transform: translateY(0); }
+
+    .login-error {
+      margin-top: 1rem;
+      font-size: 0.78rem;
+      color: #e07070;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .login-error.show { opacity: 1; }
+
+    .login-hint {
+      margin-top: 1.5rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      opacity: 0.7;
+      line-height: 1.8;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       GALLERY PAGE — hidden until login
+    ════════════════════════════════════════════════════════════ */
+    #galleryPage {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.6s var(--ease);
+    }
+    #galleryPage.visible {
+      display: block;
+      opacity: 1;
+    }
+
+    /* ── Album Hero ── */
+    .album-hero {
+      padding: 4rem 4rem 3rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .album-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .album-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 28px; height: 1px;
+      background: var(--gold);
+    }
+
+    .album-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--white);
+      line-height: 1.1;
+    }
+    /* ✏️  EDIT: Change album name below in the HTML section */
+    .album-title em { font-style: italic; color: var(--gold); }
+
+    .album-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .album-meta span { display: flex; align-items: center; gap: 0.4rem; }
+
+    /* ── Action buttons ── */
+    .album-actions { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.6rem;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: background 0.25s, transform 0.2s;
+    }
+    .btn-primary:hover { background: #d4b57e; transform: translateY(-2px); }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.73rem 1.4rem;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: border-color 0.25s, color 0.25s, background 0.25s;
+    }
+    .btn-outline:hover {
+      border-color: rgba(201,169,110,0.4);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    .btn-outline.active {
+      border-color: rgba(201,169,110,0.5);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    /* ── Logout ── */
+    .btn-logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.25s, border-color 0.25s;
+    }
+    .btn-logout:hover { color: #e07070; border-color: rgba(224,112,112,0.3); }
+
+    /* ════════════════════════════════════════════════════════════
+       GALLERY GRID
+    ════════════════════════════════════════════════════════════ */
+    .gallery-container {
+      padding: 3rem 4rem 6rem;
+    }
+
+    /* filter / view bar */
+    .gallery-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .gallery-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+    .gallery-count strong { color: var(--gold); font-weight: 400; }
+
+    /* Masonry-style responsive grid */
+    .gallery-grid {
+      columns: 4;
+      column-gap: 1rem;
+    }
+    @media (max-width: 1200px) { .gallery-grid { columns: 3; } }
+    @media (max-width: 768px)  { .gallery-grid { columns: 2; } }
+    @media (max-width: 480px)  { .gallery-grid { columns: 1; } }
+
+    /* ── Individual image tile ── */
+    .gallery-tile {
+      break-inside: avoid;
+      margin-bottom: 1rem;
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), border-color 0.3s;
+    }
+    .gallery-tile:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(201,169,110,0.18);
+      border-color: rgba(201,169,110,0.2);
+    }
+
+    /* image skeleton / loader */
+    .tile-img-wrap {
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .tile-img-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+      animation: shimmer 1.8s infinite;
+      z-index: 1;
+    }
+    .tile-img-wrap.loaded::before { display: none; }
+
+    @keyframes shimmer {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .gallery-tile img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;       /* cover for grid — no cropping of image area */
+      display: block;
+      filter: brightness(0.93) saturate(0.88);
+      transition: filter 0.4s, transform 0.5s var(--ease);
+      /* blur-in load effect */
+      filter: blur(8px) brightness(0.7);
+    }
+    .gallery-tile img.loaded {
+      filter: brightness(0.93) saturate(0.88);
+      animation: tileReveal 0.5s var(--ease) both;
+    }
+    @keyframes tileReveal {
+      from { filter: blur(6px) brightness(0.7); }
+      to   { filter: brightness(0.93) saturate(0.88); }
+    }
+    .gallery-tile:hover img { filter: brightness(1) saturate(1.05); transform: scale(1.04); }
+
+    /* hover overlay */
+    .tile-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(14,14,13,0.88) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.35s var(--ease);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.2rem;
+      gap: 0.6rem;
+      z-index: 2;
+    }
+    .gallery-tile:hover .tile-overlay { opacity: 1; }
+
+    .tile-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transform: translateY(8px);
+      transition: transform 0.35s var(--ease);
+    }
+    .gallery-tile:hover .tile-actions { transform: translateY(0); }
+
+    .tile-index {
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+
+    .tile-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid rgba(201,169,110,0.35);
+      border-radius: 20px;
+      background: rgba(14,14,13,0.6);
+      backdrop-filter: blur(8px);
+      color: var(--gold);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .tile-btn:hover { background: var(--gold-dim); border-color: var(--gold); }
+
+    /* number badge */
+    .tile-num {
+      position: absolute;
+      top: 0.8rem;
+      left: 0.8rem;
+      background: rgba(14,14,13,0.65);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      z-index: 3;
+      transition: color 0.3s;
+    }
+    .gallery-tile:hover .tile-num { color: var(--gold); }
+
+    /* ════════════════════════════════════════════════════════════
+       LIGHTBOX
+    ════════════════════════════════════════════════════════════ */
+    #lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(8,8,7,0.97);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s var(--ease);
+    }
+    #lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* top bar */
+    .lb-topbar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      background: linear-gradient(to bottom, rgba(8,8,7,0.9), transparent);
+      z-index: 10;
+    }
+
+    .lb-counter {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--white);
+    }
+    .lb-counter em { color: var(--gold); font-style: italic; }
+
+    .lb-top-actions { display: flex; align-items: center; gap: 0.6rem; }
+
+    .lb-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      width: auto;
+      padding: 0.5rem 0.9rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius);
+      color: var(--muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .lb-btn:hover { background: rgba(255,255,255,0.12); color: var(--white); }
+    .lb-btn.active { background: var(--gold-dim); border-color: rgba(201,169,110,0.4); color: var(--gold); }
+
+    .lb-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      color: var(--muted);
+      font-size: 1.2rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .lb-close:hover { background: rgba(224,112,112,0.15); color: #e07070; border-color: rgba(224,112,112,0.3); }
+
+    /* main image area */
+    .lb-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 72px 80px 80px;
+    }
+
+    .lb-img-wrap {
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    #lbImage {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;   /* CONTAIN — shows full image, no cropping of faces */
+      border-radius: 4px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.7);
+      transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+    }
+    #lbImage.switching {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+
+    /* nav arrows */
+    .lb-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 52px; height: 52px;
+      background: rgba(14,14,13,0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 1.1rem;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+      z-index: 20;
+    }
+    .lb-arrow:hover {
+      background: rgba(201,169,110,0.15);
+      color: var(--gold);
+      border-color: rgba(201,169,110,0.3);
+      transform: translateY(-50%) scale(1.08);
+    }
+    .lb-prev { left: 1.2rem; }
+    .lb-next { right: 1.2rem; }
+
+    /* bottom bar */
+    .lb-bottombar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      background: linear-gradient(to top, rgba(8,8,7,0.9), transparent);
+      z-index: 10;
+    }
+
+    /* thumbnail strip */
+    .lb-thumbs {
+      position: absolute;
+      bottom: 72px; left: 0; right: 0;
+      display: flex;
+      gap: 6px;
+      padding: 0 1.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      justify-content: center;
+    }
+    .lb-thumbs::-webkit-scrollbar { display: none; }
+
+    .lb-thumb {
+      flex-shrink: 0;
+      width: 48px; height: 36px;
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid transparent;
+      cursor: pointer;
+      opacity: 0.45;
+      transition: opacity 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .lb-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .lb-thumb:hover { opacity: 0.75; transform: translateY(-2px); }
+    .lb-thumb.active {
+      opacity: 1;
+      border-color: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    /* slideshow progress bar */
+    .lb-progress {
+      position: absolute;
+      top: 64px; left: 0;
+      height: 2px;
+      background: var(--gold);
+      width: 0%;
+      transition: width linear;
+      z-index: 10;
+      opacity: 0;
+    }
+    .lb-progress.running { opacity: 1; }
+
+    /* ════════════════════════════════════════════════════════════
+       FOOTER — identical to homepage
+    ════════════════════════════════════════════════════════════ */
+    footer {
+      margin-top: 2rem;
+      border-top: 1px solid var(--border);
+      padding: 4rem 4rem 2.5rem;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 4rem;
+    }
+    .footer-brand .logo { font-size: 1.4rem; margin-bottom: 1rem; }
+    .footer-tagline { font-size: 0.85rem; color: var(--muted); line-height: 1.8; max-width: 260px; }
+    .footer-social { display: flex; gap: 0.8rem; margin-top: 1.8rem; }
+    .social-link {
+      width: 38px; height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: border-color 0.25s, color 0.25s, background 0.25s;
+    }
+    .social-link:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+    .footer-col h4 {
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-col li a { font-size: 0.85rem; color: var(--muted); transition: color 0.2s; }
+    .footer-col li a:hover { color: var(--gold); }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .footer-bottom a { color: var(--muted); transition: color 0.2s; }
+    .footer-bottom a:hover { color: var(--gold); }
+
+    /* ════════════════════════════════════════════════════════════
+       RESPONSIVE
+    ════════════════════════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      header { padding: 0 1.5rem; }
+      nav { display: none; flex-direction: column; position: fixed; inset: 72px 0 0; background: var(--bg); padding: 2rem; gap: 1.5rem; }
+      nav.open { display: flex; }
+      nav a { font-size: 1rem; }
+      .nav-toggle { display: flex; }
+      .album-hero { padding: 2.5rem 1.5rem 2rem; }
+      .gallery-container { padding: 2rem 1.2rem 4rem; }
+      .lb-stage { padding: 64px 60px 120px; }
+      .lb-arrow { width: 40px; height: 40px; }
+      .lb-thumbs { bottom: 64px; }
+      .lb-thumb { width: 36px; height: 28px; }
+      .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+      footer { padding: 3rem 1.5rem 2rem; }
+      .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+      .login-box { padding: 2.5rem 2rem; }
+      .album-actions { gap: 0.5rem; }
+    }
+    @media (max-width: 480px) {
+      .lb-stage { padding: 64px 48px 110px; }
+      .lb-prev { left: 0.4rem; }
+      .lb-next { right: 0.4rem; }
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       FADE-UP ANIMATION
+    ════════════════════════════════════════════════════════════ */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.65s var(--ease), transform 0.65s var(--ease);
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* ════════════════════════════════════════════════════════════
+       TOAST NOTIFICATION
+    ════════════════════════════════════════════════════════════ */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface);
+      border: 1px solid rgba(201,169,110,0.3);
+      border-radius: var(--radius);
+      padding: 0.75rem 1.5rem;
+      font-size: 0.8rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 2000;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─────────────────────────────────────────────────────────
+       TOAST NOTIFICATION
+  ───────────────────────────────────────────────────────────── -->
+  <div id="toast"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LOGIN SCREEN
+       ✏️  EDIT: Change username and password in the JS section
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="loginScreen">
+    <div class="login-box">
+      <!-- Brand -->
+      <div class="login-logo">BHARG<span>O</span>BJYOTI</div>
+      <p class="login-subtitle">Private Client Gallery</p>
+      <div class="login-divider"></div>
+
+      <!-- Form -->
+      <div class="form-group">
+        <label for="username">Your Name / Client ID</label>
+        <input type="text" id="username" placeholder="e.g. santana" autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label for="password">Access Password</label>
+        <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" />
+      </div>
+
+      <button class="login-btn" onclick="handleLogin()">
+        Access My Gallery &nbsp;→
+      </button>
+
+      <p class="login-error" id="loginError">Incorrect credentials. Please try again.</p>
+
+      <p class="login-hint">
+        Your gallery link &amp; password were sent to you by email.<br>
+        Having trouble? Contact <a href="tel:1234567890" style="color:var(--gold)">+91 88224 85089</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       GALLERY PAGE (shown after login)
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="galleryPage">
+
+    <!-- ── HEADER ─────────────────────────────────────────── -->
+    <header id="siteHeader">
+      <a href="index.html" class="logo">BHARG<span>O</span>BJYOTI</a>
+
+      <nav id="nav">
+        <a href="index.html">Home</a>
+        <a href="index.html#work">Portfolio</a>
+        <a href="index.html#contact">Contact</a>
+        <button class="btn-logout" onclick="handleLogout()">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+          Log Out
+        </button>
+      </nav>
+
+      <button class="nav-toggle" id="navToggle" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <!-- ── ALBUM HERO ──────────────────────────────────────── -->
+    <div class="album-hero fade-up">
+      <div>
+        <p class="album-eyebrow" id="albumCategory">Annaprashan</p>
+        <!-- ✏️  EDIT: Change the album title here -->
+        <h1 class="album-title" id="albumTitle">
+          Paridhi's <em>Rice</em><br>Ceremony
+        </h1>
+        <div class="album-meta">
+          <!-- ✏️  EDIT: Change date and location -->
+          <span>
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            April 2026
+          </span>
+          <span>
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Tiok,Jorhat, Assam
+          </span>
+          <span id="imageCountDisplay">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            <span id="totalCount">0</span> Photos
+          </span>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="album-actions">
+        <button class="btn-outline" id="slideshowToggleTop" onclick="toggleSlideshow()">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Slideshow
+        </button>
+        <button class="btn-primary" onclick="downloadAll()">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Download All
+        </button>
+      </div>
+    </div>
+
+    <!-- ── GALLERY GRID ────────────────────────────────────── -->
+    <div class="gallery-container">
+      <div class="gallery-bar fade-up">
+        <p class="gallery-count">
+          Showing <strong id="shownCount">0</strong> photos — click any to view full size
+        </p>
+      </div>
+
+      <!-- ✏️  Images are injected here by JavaScript -->
+      <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+
+    <!-- ── FOOTER ──────────────────────────────────────────── -->
+    <footer id="contact">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <!-- ✏️  EDIT: Update brand name here if needed -->
+          <a href="index.html" class="logo">BHARG<span>O</span>BJYOTI</a>
+          <p class="footer-tagline">We craft images that outlast the occasion — portraits, weddings, and editorial work rooted in stillness and light.</p>
+          <div class="footer-social">
+            <a href="#" class="social-link" aria-label="Instagram">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+            </a>
+            <a href="#" class="social-link" aria-label="Facebook">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+            <a href="mailto:bhargobjyoti6000@gmail.com" class="social-link" aria-label="Email">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Navigate</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#work">Portfolio</a></li>
+            <li><a href="index.html#about">About</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="#">Weddings</a></li>
+            <li><a href="#">Portraits</a></li>
+            <li><a href="#">Editorial</a></li>
+            <li><a href="#">Newborn</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:bhargobjyoti6000@gmail.com">bhargobjyoti6000@gmail.com</a></li>
+            <li><a href="tel:+918822485089">+91 88224 85089</a></li>
+            <li><a href="index.html#contact">Book a Session</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 BHARGOBJYOTI. All rights reserved.</span>
+        <span><a href="#">Privacy Policy</a> &nbsp;·&nbsp; <a href="#">Terms</a></span>
+      </div>
+    </footer>
+
+  </div><!-- /galleryPage -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LIGHTBOX
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+
+    <!-- Progress bar (slideshow) -->
+    <div class="lb-progress" id="lbProgress"></div>
+
+    <!-- Top bar -->
+    <div class="lb-topbar">
+      <div class="lb-counter">
+        <span id="lbCurrent">1</span> <em>/</em> <span id="lbTotal">1</span>
+      </div>
+      <div class="lb-top-actions">
+        <button class="lb-btn" id="lbSlideshowBtn" onclick="toggleSlideshow()" title="Slideshow">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Slideshow
+        </button>
+        <button class="lb-btn" onclick="downloadCurrent()" title="Download this photo">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Download
+        </button>
+        <button class="lb-close" onclick="closeLightbox()" title="Close (Esc)">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main stage -->
+    <div class="lb-stage">
+      <div class="lb-img-wrap">
+        <!-- object-fit: contain — full image visible, no face cropping -->
+        <img id="lbImage" src="" alt="Gallery photo" />
+      </div>
+    </div>
+
+    <!-- Arrows -->
+    <button class="lb-arrow lb-prev" onclick="lbNavigate(-1)" title="Previous (←)">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="lb-arrow lb-next" onclick="lbNavigate(1)" title="Next (→)">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+
+    <!-- Thumbnail strip -->
+    <div class="lb-thumbs" id="lbThumbs"></div>
+
+    <!-- Bottom bar -->
+    <div class="lb-bottombar">
+      <span style="font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;">
+        USE ← → KEYS OR SWIPE TO NAVIGATE
+      </span>
+      <button class="lb-btn" onclick="downloadAll()">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Download All
+      </button>
+    </div>
+  </div><!-- /lightbox -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       JAVASCRIPT
+  ═══════════════════════════════════════════════════════════ -->
+  <script>
+  /* ══════════════════════════════════════════════════════════════
+     ✏️  SECTION 1 — CLIENT CREDENTIALS
+     Add as many clients as needed in this format.
+     username: what the client types in the Name field
+     password: what the client types in the Password field
+  ══════════════════════════════════════════════════════════════ */
+  const CLIENTS = [
+    
+    { username: "paridhi",     password: "paridhi2026"     },
+    /* ← Add more clients here:
+       { username: "clientname", password: "theirpassword" }, */
+  ];
+
+  /* ══════════════════════════════════════════════════════════════
+     ✏️  SECTION 2 — ALBUM CONFIGURATION
+     One album per client (or one shared album for all).
+     You can also expand this to per-client albums later.
+
+     HOW TO GET YOUR GOOGLE DRIVE FILE IDs:
+     1. Upload image to Google Drive
+     2. Right-click → "Share" → "Anyone with link"
+     3. Copy link: https://drive.google.com/file/d/FILE_ID_HERE/view
+     4. Paste just the FILE_ID below.
+
+     The page will load images using:
+     https://drive.google.com/thumbnail?id=FILE_ID&sz=w1600
+  ══════════════════════════════════════════════════════════════ */
+
+  /* ✏️  ALBUM META — shown in the hero section */
+  const ALBUM = {
+    title:    "Paridhi's Rice Ceremony",   /* displayed in title */
+    titleItalic: "Paridhi's Rice Ceremony",                   /* the italic word in title */
+    category: "Annaprashana",                      /* badge / eyebrow label */
+    // date:     "March 2025",
+    // location: "Sivasagar, Assam",
+  };
+
+  /* ✏️  IMAGE FILE IDs — replace with YOUR Google Drive file IDs */
+  const IMAGE_IDS = [
+    /* ─── Paste your Google Drive File IDs here ─────────────── */
+    "1-5zpBR8TcrKje_BiM5knhr3l2l1d-XxN",
+"1-9dGY0cr-eIIROZoIeicwrY-D9XyMwvg",
+"1-cRc2wdCiyxZz85PZRHk0pF9G7_a5CFw",
+"1-pUFwtYg-B3OFAV1tpEdDLpkjjahWIaK",
+"10dp3fpyChsmYEVMTViAO-7BoqLObGMbq",
+"11I_iI0bhGiN8mIu_6foNjqgAbGL-0Rxm",
+"11RhkECmre2RtAjgd0CPQMCGvwRbLMSoY",
+"11adWJeqf_72AQT3je70b1gga-XGc8jl2",
+"12CFNkeqECcNnxXapNM62IcBTwIrJ4L8J",
+"12p6XEm4cp3WBhasQ6IMp8HHl38xRbiBo",
+"130cuTzS6WXBg1a5TjBt2MDfZBr23bjRQ",
+"131m9E2qG9lcvOYKIZsYVtWIrXPWB8spA",
+"13lIYpTlqWfA3Pf6aZUx5HsKRsrLZ0XMb",
+"14E2YyPU2Y8hBLas3JS9utCPGXGmRYS_2",
+"14HZgdRhkgYWrzG7mCG1fovzl27O3WPAE",
+"14JLsjoZUr8NNPHj7b6Y-mbnF4TPtAI9L",
+"14YzAQEUa8bERSN4BFqzVRiR0jisJoWnO",
+"15LjIlH3oRbUhdlninB-wP8qdMX45AlLA",
+"15P_m9hns2Vl2LU-f7i8SR8aj9PGmFho0",
+"15U1_WA8aNRriLCgU0wdtXxtrJGNCS_SE",
+"15hnubEa7O2q7_XogCy06f2_h7Hp-pfYi",
+"178VnkIBJRZbw9Ltq4FkNj6r_MBXr8v-i",
+"17YrSix4fuQpk_v6aHleH5aQYTdOIBSMu",
+"18CHu8RddLuqmaYqIEfyJDR_ccUdQnbG1",
+"18P2oitbYIBhRvjXNVo5M04LHiu2MZdGz",
+"18Ro3OqC47Kf2qPxtH8wJt5mne9FQ6F5U",
+"18pJr3bMZ8ul-FA1XFdM2uT8-88gwjvht",
+"18wYTVk4MBPp5thJsHiqGB3VP4Wno7WSM",
+"18yfFVqIPRMJUWjyMuYXZ-wYAlliM9-Md",
+"19jWzcR-QcxnVwqUT0xAT0jOVA29Rfy_U",
+"19wlBnaCVShIRsOu0UfZoqhqzgvz6OZ1t",
+"1AB9adPJLmgRa47sgZ6Z_H0_bNcFUZqU2",
+"1AYeOHJG9sKf5AkrMnSADIOjiagI62dh_",
+"1AeW6XzRYLst8RArazmvX1zwqrxGpMWkl",
+"1ArcMHdvF-CqKyK4LknJOZC37B2P3ZHUZ",
+"1B1LXdV7DXZe5PBHdNhetM6T7rV51LBwD",
+"1B3NAtwW0ySWOuMJSWhUpEc_O_VULbqLc",
+"1BZVd1TqzF8c-eFUp7o3uzsthLKUIY3MD",
+"1CLkSkf98qsxUVpTFbzIcwfUUb8R0e1-3",
+"1CLzxY6sJm591ILj5fYoofeEgqBOxhfVR",
+"1CSVv4PQ7t0xK8Ykp1GVrSxJeGlm_G1yt",
+"1CsKBcpSLtKzEDWHyQss6pcbSkcmaRCMp",
+"1Cyn58kebguJZUPcHGNs5e5nJVNR1-CS0",
+"1DIsGFX2KHsfvxiebnObOY9muuxUcCVyk",
+"1DizhJc-iRishZk9ZoyOOwoCFy4pLp08H",
+"1E7f83-dSEdc5tbhcgNh82t4KxSHg0DiC",
+"1E8tKgRJBx-x3QBBtLq5o3gwUyJEyW0zH",
+"1Ey-x12lblTWpuvq4_4erhE2mMzGLOOcU",
+"1FPcnXUA-abzD49mED8IX_qApG9yq8XJR",
+"1FdraplYTG2kokiFg5oCGT4bDUD8txJvQ",
+"1FfWgzOUHcd0gMjHLqgDc1GhgZSMbJx5I",
+"1G8WWKACChtIKlkGBLZmt2PZT7nlRb1xb",
+"1GUserhlZqpB3TgNYoV-TcOgo1ayls5q8",
+"1HV7BQFVuL85NS4Jsavw41MmTvq_6M4mS",
+"1HXBKG6GFnO3a-Ouhy1wNMyfY6UUJnCDb",
+"1I8qnqNy5bNznWrnBwZVJqBwR4dPVv9Y_",
+"1IjpwI9M9OmRcA2Pg_lPN2fc9QcBe4phc",
+"1JGvW0kqb7AMbiY9zisPzstg2yUr1sZxf",
+"1JKJQaaZqhBu23_QGlYuAZiuPIXhcE2yH",
+"1JRWHgSfmoRx6aR3C9ryJcGKZoEqZSOTD",
+"1JVx7j4ZPbX0LU2jHY5w_mH8Fpm03Ppn-",
+"1Jf77l4ZaK4e6NHMdF8cXsre4CNB9D9Qb",
+"1Jh-smRaR1OoMBCaV-RGI2VMTX6SpJKRy",
+"1KhNL1erXt_TR-Z-kOHMKrmT1xVIkD2S-",
+"1KjHhX-PQbZPi-qGAJ4q91BjDluVWxQ8Y",
+"1LGVduOJaiC9xqw4I2zK964gYr8i8nbAC",
+"1LzfsWmxjmVut3_dZ6OvTmBcTnoRx13lW",
+"1MLc2Se_2B1ZI7tpdxHKvSAxR5GrI2BAu",
+"1Mpyl-Z698cI_TNzCBfXYmZE86MsHrHVd",
+"1NZrH2KlQ9kkp4GPSvxI0AeeeP9lV3FBR",
+"1NlBB2eW2ZPsrmNI5AVdsntpLlSS1ZjlG",
+"1NsHxqSaE8hi1DLQTwWFCZgL4LdV8eNlr",
+"1OEeWhX0fC0NTjUo7szsLrb-oZIpFzBAE",
+"1OSK2HcAGFh--Owm-t3NCaR83Xf8wxkS4",
+"1O_pADA51DK834gfwljyPgi7BkIh5trXg",
+"1PG-pU47YbXd_nBUzJgGM2pc5d0lv28IT",
+"1PGmedLDgvugLNH6HOTrRi7RkpPD2I6LR",
+"1PJ8G33JEliJWFSM7Sk9Og9a27OvKw1mO",
+"1PLvtW1QFdTJVYZTxVj2H5-vw2lAvXY2T",
+"1Q-GLs2jk4UsKA1doIn3C3HSd9-zPP-hi",
+"1Qxms5rMkrfS7HQX5Atnw7aYqLNj2kYGu",
+"1R03CI1OryQvWULhysfYqTej-QTLJhxor",
+"1R9X9DZkkq3At3d2AO3DH-SR7kTxC2OMP",
+"1RQUj4vatUkk_DNUdYs6OOQo49Og3Ap2w",
+"1Rik91oZMqpit10HrfOaIQ0WXVgBuzVsN",
+"1SL6xQdQX-eJCGoWw9wRIoRhNDY_hNv8b",
+"1SZ2SoAntqB7gWZEmESiqJqi0m9AAdU5t",
+"1Sj3_6GF6pAIacVxQnfv3r0egm3u5CoHz",
+"1T7XhkC8SLuXi54XbAATNyhwx8oXXQyO4",
+"1TL9mvlpHDaloz3hH6AnWJwGbD89jSui7",
+"1Ts8yAgGBGLioE62-lvi4urSATOrJUvJQ",
+"1UbQyg9lvwb1MosGUviy0-oJTxsqUawQ6",
+"1UbWsIR4ys_28S77buaHYIkv8NGy8Q5Mg",
+"1Ucq1R2SnFbZAUB5mdOrbaVqqveuNiJ7O",
+"1Udg2wWgguv8scK6OhGzYxQOLmVDW3Knl",
+"1VWNmjC4Ph8ohxeVdFJexLhr_8EmZj1ml",
+"1VykfroIAc8NvWDTRASFVDklva1vOHNig",
+"1WKYNajNMNWehk0gWiYBAINELsDgw4hlZ",
+"1WakjOIr1EAUIARchutANHiAM936CwE_9",
+"1X0Dy1JXoZ_Sc5eX8EkXdRO4TNrIqwVoR",
+"1X1yKHqvEf8NjfclEj-uDAzPwvy6vRifW",
+"1X2pHPdVs_knujvAM0ugJ01g_3Jew54qW",
+"1Y6LbDRlvlp9Wqyb2Y0krmWC1jD-jKBlO",
+"1YGSuqhXXKqi8GvpQp_GpI19GqltQ5RS1",
+"1YkXlx-dUXZlvPvXQz4K0vllUsLlBPtrT",
+"1Yp5T-tiu8BmWsjc9wLV_qicBb7zMZm5z",
+"1YyPrqH1wUPtajWv-8y50Nxe-RBQWvYzf",
+"1Z-rmOQ2EU7nQxAk03lKN65sTnan_Fgt8",
+"1ZfdWDuHjUejDHYfHCu32ARSvC4S2b005",
+"1_J5isNaepx1WGelHBCewSVMJIkUCOSAx",
+"1_JxxGxu_aGqBzmMoyCLObANxBpEINNFA",
+"1_lBzgHd0-4mQzV9Ya6-YpUY5ZFwCtlFj",
+"1aLCfxsQgvka5OSYicIp7tLl6i3otBGpE",
+"1aSyDct6FjDBYgrr_Ns2If5NujmV4fngw",
+"1abIvQiCezVf5Q13GHuSZ6ME0PWcj6sny",
+"1ae6neDuDXegGKKe55BhlQVLpaHE8Ja4K",
+"1aqxkX-hRGk73fJxpEmjA0IN_6hULyNyP",
+"1biMvvh8g7RjHqRRIv7uxoXOe_wow53ZR",
+"1bpxFOldQZzgKIRSOKlP7LogtLz8F6LFj",
+"1c3r3b7kLMbPXBeSvYSaQoHsgQbM_SUkl",
+"1c9m0IiBqpgVgxZGReJRapCphGOuHLWR_",
+"1dYiN_H4jebSXkdPaTJZKpnj-XcChe5_d",
+"1dsrXvx2NCrETbNPEVr43_gBrQ0tQ81ln",
+"1dthOGsFJQ2JbiApaDx7dI-l7Gzx0FjUT",
+"1e6glnkGMoi6fWpJoDgYsf_CqgMncD4We",
+"1fRMKEKmLxk_iCt7yPQVgl6N7d30ajELN",
+"1ft-VRL4RfknyVzfZJnEzdhh71nAuva_6",
+"1g3QsdcQOyoBqtqq-dReixWZ8LFwC4IIP",
+"1g5XLuKHruk34xFv41uE7trkl_q6DU8Xa",
+"1gAzdm5sXQsno2SAXd6KXYBLoktVx__ZY",
+"1gK8floJ--PfSBPq1J-SqhPwk3h0u2yOt",
+"1gQEQPHewGKXAk6YacDs8U3reFeHh0_AM",
+"1g_R5TPKxkMNCo0IdMd2ElzmgN0ejclS_",
+"1ha7ukGAXAmQsjp9OmKUIiSB3O1aYG2FM",
+"1i4WzuGaYCP-YV1KeN7E0El7J_38lF0q-",
+"1iE68e_sHHgwBZ-MisPHazpUMIPuZR_0u",
+"1iXpa9Au9EehnSxHeiB-FHkRk1r0c6yIX",
+"1ifW_hUgnUYebHkwZRHfpL4WyTiw0VtwF",
+"1ikHRp8oJDyRrFgljObljFM1cAveZWt9l",
+"1jsK3MsAIja-4ZTCi_sGTdFxpSBsHXZJo",
+"1k0ngNWivrv888WZeB2cVSZ_HnnWET_7k",
+"1lLTIRJJA9301RsyqxG6JeyIUxdYLWkKP",
+"1lf3aqHQ9yCB9TshdvFgVgVTNX-bEjEiH",
+"1lkqdJ4piGRDrddv37XsihpcW_xRewdrv",
+"1mFXxNHftNbwHdKS5qfP0UNJ07rStJ5fk",
+"1mGxVJ2U0k1ebm0dryccVN0quZbzdzVQm",
+"1mSe75hcuUxoVloo_Yl3jZsJxYkoVJ2Lh",
+"1mhydcJEsK8xWV09svOkvZw-2fU7dglkg",
+"1mjpJSzGOPmNUw2fAJWy64TN-auYs_RdL",
+"1nJ1mmJIBTGAUHbVCUvVN8bM6fYhg2oFx",
+"1nRqjlNI1jGM9Bw8aAKACW9l88Y0AOtSL",
+"1nlFZAa9HUdBBfO87eyi1xmxQIcK10SEP",
+"1oLZxH8IrIInsQ8n_57-B8uQmh2JrpArL",
+"1pH4hqoOgJYrljmYjKNoT8Px-N4aBKlTX",
+"1ph6yxcuIARudN2XjJ0C0KOR3H5Q5dSMP",
+"1pj43Ki900E1ra91C1s595e5qHPDhw_qd",
+"1qMZ-UVFdM3UtYdft_3p2u1T4BYqQKryX",
+"1qVP0YKSMIHI2e_OsyfTvLqachEX4gyyo",
+"1qa54DSoxX5JCNpXq5MMQtd8eBdBFI160",
+"1qp94UkZpFpz0oqQWL79K_YCPCwp8peRX",
+"1qsErsy87bivh1XOA9jwrS9sUSLgcmf-L",
+"1qwPTKOMcvEK34lNI172_GkcbVDltQmbw",
+"1rEyr3nRPWfkH_p5X3iE7mR0mOfpRn1zw",
+"1rmAgHsc55xlRONceBTiUPiStu9-FmZyU",
+"1shNaPF_0ZqaMuvZifZRTOsygAbe2JAAu",
+"1tYJzp8EK4JQzKayUEpHcLlA4fmHKD0k_",
+"1tmFsbKpR92pLFFYtQLXvaYVmJTHsh1C9",
+"1to-PwVSTpY0p1yQw4d66MJkgcB0pCF8v",
+"1uC3uTrq_ZpCwPO77rHmnuK0cCLKnO9T4",
+"1uuk0dFm1oUEzm9YnmCPbaS0ru1YiM6XA",
+"1vKyLtdx9YIkQ31-BndwvISZh6UKXJwMc",
+"1vPKbDci_cWnyNkodH_iZEfRcUmIMoDOo",
+"1vXk1FBX-PJbrZxtATNDoKNJC_oQvZeX8",
+"1w1XHhdVpoxfiY59pY2itlueFZN4I1hXf",
+"1wCd7ArzFmEWCq1vcaPVG2umIJQFTnlqq",
+"1wERbo8kwtpQrPxooEQafAJH5fY_n0jo0",
+"1wKQqBy6l3k48csg_MLlWU5Kc8-2cN7IN",
+"1w_czZnoFFTgLKD18MWxctzTW6-4BWpDS",
+"1wobrxPFLx2y96jo9MCV4QRGwFjh0-VGq",
+"1xYl7Q5W_dbz1ChENkyW29GqV3bkd0Rwk",
+"1xuPWv_uos6_vgW9xm2pmopq-C1OIcPNM",
+"1y3TWD68OA747JvQeyWUgx0EMbzICK9Nd",
+"1yIk_E2gD9QmibwFGAff66H7FtPAfHFAy",
+"1yLw9k8OFLupZUK9VoiRD2C3-x-ZnpiAx",
+"1yOblj7S0jUEEwyRiiOkrAw9eK_bMnTTo",
+"1yU3SPK1EFfS-IyAoiw1aETqafiV4RrJL",
+"1yevbvjr9kwi26n9XkqXYpzGGnIk_Lgw1",
+"1yhtOkN_VoqYzRGfdSrvBnHMZzzP_Atrj",
+"1yt_X7lvB0V5MsQN6w3hDmYZLUG2rxujU",
+"1zLVoy79E_31AGnNsrpvaGjPxruuLAiiN",
+"1zcQG-rTBMRwWwe0Bkrg0j6PqC0CPFODG",  /* Image 04 */
+    /* Add as many IDs as you need — just copy the line above   */
+    /* "YOUR_FILE_ID_HERE",                  Image 05 */
+    /* "YOUR_FILE_ID_HERE",                  Image 06 */
+    /* "YOUR_FILE_ID_HERE",                  Image 07 */
+    /* ... */
+  ];
+
+  /* ══════════════════════════════════════════════════════════════
+     ✏️  SECTION 3 — SLIDESHOW SETTINGS
+  ══════════════════════════════════════════════════════════════ */
+  const SLIDESHOW_INTERVAL_MS = 4000;   /* milliseconds per slide (4000 = 4 sec) */
+
+  /* ══════════════════════════════════════════════════════════════
+     INTERNAL — no need to edit below this line
+  ══════════════════════════════════════════════════════════════ */
+
+  /* Build full image URLs */
+  function driveUrl(id, size) {
+    return `https://drive.google.com/thumbnail?id=${id}&sz=${size || 'w1600'}`;
+  }
+
+  /* ── STATE ───────────────────────────────────────────────── */
+  let currentIndex   = 0;
+  let slideshowTimer = null;
+  let isSlideshow    = false;
+  let touchStartX    = 0;
+  let touchEndX      = 0;
+
+  /* ── LOGIN ───────────────────────────────────────────────── */
+  function handleLogin() {
+    const u = document.getElementById('username').value.trim().toLowerCase();
+    const p = document.getElementById('password').value.trim();
+    const err = document.getElementById('loginError');
+
+    const match = CLIENTS.find(c =>
+      c.username.toLowerCase() === u && c.password === p
+    );
+
+    if (match) {
+      err.classList.remove('show');
+      const loginScreen = document.getElementById('loginScreen');
+      loginScreen.classList.add('hidden');
+      setTimeout(() => {
+        loginScreen.style.display = 'none';
+        showGallery();
+      }, 600);
+    } else {
+      err.classList.add('show');
+      /* shake animation */
+      const box = document.querySelector('.login-box');
+      box.style.animation = 'none';
+      box.offsetHeight; /* reflow */
+      box.style.animation = 'shake 0.45s var(--ease)';
+    }
+  }
+
+  function handleLogout() {
+    location.reload();
+  }
+
+  /* Allow Enter key in login form */
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+  document.getElementById('username').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('password').focus();
+  });
+
+  /* ── SHOW GALLERY ────────────────────────────────────────── */
+  function showGallery() {
+    const page = document.getElementById('galleryPage');
+    page.style.display = 'block';
+    setTimeout(() => page.classList.add('visible'), 20);
+
+    /* Update album meta in DOM */
+    document.getElementById('albumCategory').textContent = ALBUM.category;
+    document.getElementById('totalCount').textContent    = IMAGE_IDS.length;
+    document.getElementById('shownCount').textContent    = IMAGE_IDS.length;
+
+    buildGrid();
+    buildLightboxThumbs();
+
+    /* Scroll animations */
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  }
+
+  /* ── BUILD GALLERY GRID ──────────────────────────────────── */
+  function buildGrid() {
+    const grid = document.getElementById('galleryGrid');
+    grid.innerHTML = '';
+
+    IMAGE_IDS.forEach((id, i) => {
+      const tile = document.createElement('div');
+      tile.className = 'gallery-tile';
+      tile.setAttribute('role', 'button');
+      tile.setAttribute('tabindex', '0');
+      tile.setAttribute('aria-label', `Photo ${i + 1}`);
+
+      /* Use w800 for grid thumbnails — faster loading */
+      const src = driveUrl(id, 'w800');
+
+      tile.innerHTML = `
+        <div class="tile-num">${String(i + 1).padStart(2, '0')}</div>
+        <div class="tile-img-wrap" id="wrap-${i}">
+          <img
+            src="${src}"
+            alt="Photo ${i + 1}"
+            loading="lazy"
+            onload="onTileLoad(this, ${i})"
+          />
+        </div>
+        <div class="tile-overlay">
+          <div class="tile-actions">
+            <span class="tile-index">Photo ${String(i + 1).padStart(2, '0')} / ${String(IMAGE_IDS.length).padStart(2, '0')}</span>
+            <div style="display:flex;gap:0.5rem;">
+              <button class="tile-btn" onclick="downloadSingle(event, '${id}', ${i})">
+                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Save
+              </button>
+              <button class="tile-btn" onclick="openLightbox(${i})">
+                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                View
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      /* Click tile → open lightbox */
+      tile.addEventListener('click', (e) => {
+        /* don't trigger if download or view button was clicked */
+        if (e.target.closest('.tile-btn')) return;
+        openLightbox(i);
+      });
+      tile.addEventListener('keydown', e => {
+        if (e.key === 'Enter') openLightbox(i);
+      });
+
+      grid.appendChild(tile);
+    });
+  }
+
+  function onTileLoad(img, i) {
+    img.classList.add('loaded');
+    const wrap = document.getElementById(`wrap-${i}`);
+    if (wrap) wrap.classList.add('loaded');
+  }
+
+  /* ── LIGHTBOX ─────────────────────────────────────────────── */
+  function buildLightboxThumbs() {
+    const container = document.getElementById('lbThumbs');
+    container.innerHTML = '';
+    IMAGE_IDS.forEach((id, i) => {
+      const t = document.createElement('div');
+      t.className = 'lb-thumb';
+      t.id = `thumb-${i}`;
+      t.innerHTML = `<img src="${driveUrl(id, 'w200')}" alt="Thumb ${i+1}" loading="lazy" />`;
+      t.addEventListener('click', () => navigateTo(i));
+      container.appendChild(t);
+    });
+  }
+
+  function openLightbox(index) {
+    currentIndex = index;
+    const lb = document.getElementById('lightbox');
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    loadLbImage(index);
+    updateThumbActive(index);
+    document.getElementById('lbTotal').textContent = IMAGE_IDS.length;
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+    if (isSlideshow) stopSlideshow();
+  }
+
+  function loadLbImage(index) {
+    const img    = document.getElementById('lbImage');
+    const src    = driveUrl(IMAGE_IDS[index], 'w1600');
+
+    img.classList.add('switching');
+    setTimeout(() => {
+      img.src = src;
+      img.onload = () => img.classList.remove('switching');
+      document.getElementById('lbCurrent').textContent = index + 1;
+      updateThumbActive(index);
+    }, 250);
+  }
+
+  function lbNavigate(direction) {
+    const next = (currentIndex + direction + IMAGE_IDS.length) % IMAGE_IDS.length;
+    navigateTo(next);
+  }
+
+  function navigateTo(index) {
+    currentIndex = index;
+    loadLbImage(index);
+    /* restart slideshow timer on manual navigation */
+    if (isSlideshow) {
+      clearInterval(slideshowTimer);
+      startSlideshowTimer();
+    }
+  }
+
+  function updateThumbActive(index) {
+    document.querySelectorAll('.lb-thumb').forEach((t, i) => {
+      t.classList.toggle('active', i === index);
+    });
+    /* scroll active thumb into view */
+    const active = document.getElementById(`thumb-${index}`);
+    if (active) active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }
+
+  /* ── SLIDESHOW ───────────────────────────────────────────── */
+  function toggleSlideshow() {
+    if (isSlideshow) {
+      stopSlideshow();
+    } else {
+      /* if lightbox not open, open it first */
+      if (!document.getElementById('lightbox').classList.contains('open')) {
+        openLightbox(0);
+      }
+      startSlideshow();
+    }
+  }
+
+  function startSlideshow() {
+    isSlideshow = true;
+    const btn1 = document.getElementById('lbSlideshowBtn');
+    const btn2 = document.getElementById('slideshowToggleTop');
+    if (btn1) btn1.classList.add('active');
+    if (btn2) btn2.classList.add('active');
+    const prog = document.getElementById('lbProgress');
+    prog.classList.add('running');
+    startSlideshowTimer();
+  }
+
+  function startSlideshowTimer() {
+    const prog = document.getElementById('lbProgress');
+    prog.style.transition = 'none';
+    prog.style.width = '0%';
+    /* force reflow */
+    prog.offsetHeight;
+    prog.style.transition = `width ${SLIDESHOW_INTERVAL_MS}ms linear`;
+    prog.style.width = '100%';
+
+    slideshowTimer = setInterval(() => {
+      lbNavigate(1);
+      /* reset bar */
+      prog.style.transition = 'none';
+      prog.style.width = '0%';
+      prog.offsetHeight;
+      prog.style.transition = `width ${SLIDESHOW_INTERVAL_MS}ms linear`;
+      prog.style.width = '100%';
+    }, SLIDESHOW_INTERVAL_MS);
+  }
+
+  function stopSlideshow() {
+    isSlideshow = false;
+    clearInterval(slideshowTimer);
+    const btn1 = document.getElementById('lbSlideshowBtn');
+    const btn2 = document.getElementById('slideshowToggleTop');
+    if (btn1) btn1.classList.remove('active');
+    if (btn2) btn2.classList.remove('active');
+    const prog = document.getElementById('lbProgress');
+    prog.style.transition = 'none';
+    prog.style.width = '0%';
+    prog.classList.remove('running');
+  }
+
+  /* ── DOWNLOAD ────────────────────────────────────────────── */
+  function downloadSingle(e, id, index) {
+    e.stopPropagation();
+    triggerDownload(id, `photo-${String(index + 1).padStart(2, '0')}.jpg`);
+    showToast(`Downloading Photo ${index + 1}…`);
+  }
+
+  function downloadCurrent() {
+    const id = IMAGE_IDS[currentIndex];
+    triggerDownload(id, `photo-${String(currentIndex + 1).padStart(2, '0')}.jpg`);
+    showToast(`Downloading Photo ${currentIndex + 1}…`);
+  }
+
+  function downloadAll() {
+    showToast('Starting download of all photos…');
+    IMAGE_IDS.forEach((id, i) => {
+      setTimeout(() => {
+        triggerDownload(id, `photo-${String(i + 1).padStart(2, '0')}.jpg`);
+      }, i * 600);   /* stagger to avoid browser blocking */
+    });
+  }
+
+  function triggerDownload(fileId, filename) {
+    /* Use Google Drive direct download link */
+    const url  = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    const link = document.createElement('a');
+    link.href     = url;
+    link.download = filename;
+    link.target   = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  /* ── TOAST ───────────────────────────────────────────────── */
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  /* ── KEYBOARD NAVIGATION ─────────────────────────────────── */
+  document.addEventListener('keydown', (e) => {
+    const lb = document.getElementById('lightbox');
+    if (!lb.classList.contains('open')) return;
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown':  lbNavigate(1);  break;
+      case 'ArrowLeft':  case 'ArrowUp':    lbNavigate(-1); break;
+      case 'Escape':                         closeLightbox(); break;
+      case ' ':  e.preventDefault(); toggleSlideshow(); break;
+    }
+  });
+
+  /* ── TOUCH SWIPE ─────────────────────────────────────────── */
+  const lb = document.getElementById('lightbox');
+  lb.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 50) {
+      lbNavigate(diff > 0 ? 1 : -1);
+    }
+  }, { passive: true });
+
+  /* ── MOBILE NAV ──────────────────────────────────────────── */
+  document.getElementById('navToggle').addEventListener('click', () => {
+    document.getElementById('nav').classList.toggle('open');
+  });
+
+  /* ── HEADER SHADOW ON SCROLL ─────────────────────────────── */
+  const siteHeader = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    siteHeader.style.background = window.scrollY > 40
+      ? 'rgba(14,14,13,0.97)'
+      : 'rgba(14,14,13,0.85)';
+  });
+
+  /* ── SHAKE ANIMATION (login error) ──────────────────────── */
+  const shakeStyle = document.createElement('style');
+  shakeStyle.textContent = `
+    @keyframes shake {
+      0%,100%{ transform: translateX(0); }
+      20%    { transform: translateX(-8px); }
+      40%    { transform: translateX(8px); }
+      60%    { transform: translateX(-6px); }
+      80%    { transform: translateX(6px); }
+    }
+  `;
+  document.head.appendChild(shakeStyle);
+  </script>
+
+</body>
+</html>

@@ -1,16 +1,1062 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Clients</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BHARGOBJYOTI — Photography</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── TOKENS ─────────────────────────────────────────── */
+    :root {
+      --bg:        #0e0e0d;
+      --surface:   #161614;
+      --border:    rgba(255,255,255,0.07);
+      --text:      #e8e2d9;
+      --muted:     #7a7670;
+      --gold:      #c9a96e;
+      --gold-dim:  rgba(201,169,110,0.15);
+      --white:     #f5f0e8;
+      --radius:    4px;
+      --ease:      cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* ─── RESET ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; width: 100%; }
+
+    /* ─── GRAIN OVERLAY ──────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ─── HEADER ─────────────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4rem;
+      height: 72px;
+      background: rgba(14,14,13,0.85);
+      backdrop-filter: blur(18px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s var(--ease);
+    }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .logo span { color: var(--gold); }
+
+    nav { display: flex; gap: 2.5rem; align-items: center; }
+    nav a {
+      font-size: 0.78rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      position: relative;
+      transition: color 0.25s;
+    }
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 0; height: 1px;
+      background: var(--gold);
+      transition: width 0.3s var(--ease);
+    }
+    nav a:hover { color: var(--white); }
+    nav a:hover::after { width: 100%; }
+
+    .nav-cta {
+      padding: 0.45rem 1.2rem;
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      color: var(--gold) !important;
+      font-size: 0.75rem !important;
+      letter-spacing: 0.14em !important;
+      transition: background 0.25s, color 0.25s !important;
+    }
+    .nav-cta:hover { background: var(--gold); color: var(--bg) !important; }
+    .nav-cta::after { display: none !important; }
+
+    /* ─── HERO ───────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 90vh;
+      display: flex;
+      align-items: flex-end;
+      padding: 6rem 4rem;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(14,14,13,0.3) 0%, rgba(14,14,13,0.8) 60%, var(--bg) 100%),
+        linear-gradient(120deg, #1a1208 0%, #0e0e0d 50%, #0a0d12 100%);
+    }
+
+    /* Decorative light streak */
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      top: -10%;
+      left: 30%;
+      width: 1px;
+      height: 140%;
+      background: linear-gradient(to bottom, transparent, rgba(201,169,110,0.12), transparent);
+      transform: rotate(15deg);
+    }
+
+    .hero-content {
+      position: relative;
+      max-width: 720px;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 36px; height: 1px;
+      background: var(--gold);
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(3.2rem, 7vw, 6.5rem);
+      line-height: 1.0;
+      color: var(--white);
+      margin-bottom: 1.8rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--gold); }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 420px;
+      margin-bottom: 2.5rem;
+      line-height: 1.8;
+    }
+
+    .hero-actions { display: flex; gap: 1.2rem; align-items: center; }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 2rem;
+      background: var(--gold);
+      color: var(--bg);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      transition: background 0.25s, transform 0.25s;
+    }
+    .btn-primary:hover { background: #d4b57e; transform: translateY(-2px); }
+
+    .btn-ghost {
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.25s;
+    }
+    .btn-ghost:hover { color: var(--white); }
+    .btn-ghost .arrow { transition: transform 0.25s; }
+    .btn-ghost:hover .arrow { transform: translateX(4px); }
+
+    /* scroll indicator */
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem;
+      right: 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .scroll-line {
+      width: 1px; height: 50px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; transform: scaleY(1); }
+      50%       { opacity: 1;   transform: scaleY(1.1); }
+    }
+
+    /* ─── SECTION HEADER ─────────────────────────────────── */
+    .section { padding: 6rem 4rem; }
+
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 3.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      color: var(--white);
+      line-height: 1.1;
+    }
+    .section-title em { font-style: italic; }
+
+    .view-all {
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.25s;
+      white-space: nowrap;
+      padding-bottom: 4px;
+    }
+    .view-all:hover { color: var(--gold); }
+    .view-all svg { transition: transform 0.25s; }
+    .view-all:hover svg { transform: translateX(4px); }
+
+    /* ─── ALBUM GRID ─────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* ── Album Card ── */
+    .card {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), border-color 0.4s;
+    }
+    .card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 32px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,169,110,0.2);
+      border-color: rgba(201,169,110,0.25);
+    }
+
+    /* Featured card spans 2 columns */
+    .card.featured { grid-column: span 2; }
+    @media (max-width: 768px) { .card.featured { grid-column: span 1; } }
+
+    .card-image {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+    }
+    .card.featured .card-image { aspect-ratio: 16/9; }
+
+    .card-image img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s var(--ease), filter 0.4s;
+      filter: brightness(0.92) saturate(0.9);
+    }
+    .card:hover .card-image img {
+      transform: scale(1.07);
+      filter: brightness(1) saturate(1.05);
+    }
+
+    /* category badge */
+    .card-badge {
+      position: absolute;
+      top: 1rem; left: 1rem;
+      padding: 0.25rem 0.75rem;
+      background: rgba(14,14,13,0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .card:hover .card-badge { color: var(--gold); border-color: rgba(201,169,110,0.3); }
+
+    /* hover overlay */
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(14,14,13,0.85) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 0.4s var(--ease);
+      display: flex;
+      align-items: flex-end;
+      padding: 1.5rem;
+    }
+    .card:hover .card-overlay { opacity: 1; }
+
+    .overlay-view {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      transform: translateY(8px);
+      transition: transform 0.4s var(--ease);
+    }
+    .card:hover .overlay-view { transform: translateY(0); }
+
+    /* card body */
+    .card-body {
+      padding: 1.2rem 1.3rem 1.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .card-client {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.2;
+    }
+    .card-meta {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-top: 0.2rem;
+    }
+
+    .card-icon {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: border-color 0.3s, color 0.3s, background 0.3s;
+      flex-shrink: 0;
+    }
+    .card:hover .card-icon {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    /* ─── STATS BAR ──────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin: 0 4rem;
+    }
+    .stat {
+      padding: 3rem 2rem;
+      border-right: 1px solid var(--border);
+      text-align: center;
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.2rem;
+      font-weight: 300;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .stat-num span { color: var(--gold); font-style: italic; }
+    .stat-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ─── TESTIMONIAL ────────────────────────────────────── */
+    .testimonial-section {
+      padding: 6rem 4rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+    .testimonial-img {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      aspect-ratio: 4/5;
+    }
+    .testimonial-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.85) saturate(0.8);
+    }
+    .testimonial-img::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--gold-dim), transparent);
+      z-index: 1;
+    }
+    .testimonial-img .img-tag {
+      position: absolute;
+      bottom: 1.5rem; right: -1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1rem 1.4rem;
+      border-radius: 4px;
+      z-index: 2;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.4);
+    }
+    .img-tag-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .img-tag-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .testimonial-content blockquote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--white);
+      line-height: 1.5;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .testimonial-content blockquote::before {
+      content: '\201C';
+      font-size: 6rem;
+      color: var(--gold);
+      opacity: 0.2;
+      position: absolute;
+      top: -1.5rem;
+      left: -1rem;
+      line-height: 1;
+      font-style: normal;
+    }
+    .testimonial-author { display: flex; align-items: center; gap: 1rem; }
+    .author-avatar {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      background: var(--gold-dim);
+      border: 1px solid rgba(201,169,110,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      color: var(--gold);
+    }
+    .author-name {
+      font-weight: 400;
+      font-size: 0.9rem;
+      color: var(--white);
+    }
+    .author-role {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-top: 0.1rem;
+    }
+
+    /* ─── FOOTER ─────────────────────────────────────────── */
+    footer {
+      margin-top: 2rem;
+      border-top: 1px solid var(--border);
+      padding: 4rem 4rem 2.5rem;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 4rem;
+    }
+    .footer-brand .logo { font-size: 1.4rem; margin-bottom: 1rem; }
+    .footer-tagline {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 260px;
+    }
+    .footer-social {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1.8rem;
+    }
+    .social-link {
+      width: 38px; height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: border-color 0.25s, color 0.25s, background 0.25s;
+    }
+    .social-link:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    .footer-col h4 {
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-col li a {
+      font-size: 0.85rem;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+    .footer-col li a:hover { color: var(--gold); }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .footer-bottom a { color: var(--muted); transition: color 0.2s; }
+    .footer-bottom a:hover { color: var(--gold); }
+
+    /* ─── MOBILE NAV TOGGLE ──────────────────────────────── */
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-direction: column;
+      gap: 5px;
+      padding: 4px;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 24px; height: 1px;
+      background: var(--text);
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(2) { border-right: none; }
+      .testimonial-section { grid-template-columns: 1fr; gap: 3rem; }
+      .testimonial-img { aspect-ratio: 16/9; }
+      .testimonial-img .img-tag { right: 1.5rem; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      header { padding: 0 1.5rem; }
+      nav { display: none; flex-direction: column; position: fixed; inset: 72px 0 0; background: var(--bg); padding: 2rem; gap: 1.5rem; }
+      nav.open { display: flex; }
+      nav a { font-size: 1rem; }
+      .nav-toggle { display: flex; }
+      .hero { padding: 4rem 1.5rem; min-height: 85vh; }
+      .hero-scroll { right: 1.5rem; }
+      .section { padding: 4rem 1.5rem; }
+      .stats { margin: 0 1.5rem; grid-template-columns: repeat(2, 1fr); }
+      .testimonial-section { padding: 4rem 1.5rem; }
+      .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+      footer { padding: 3rem 1.5rem 2rem; }
+      .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+      .card.featured { grid-column: span 1; }
+    }
+
+    /* ─── ENTRANCE ANIMATIONS ────────────────────────────── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    .stagger-1 { transition-delay: 0.05s; }
+    .stagger-2 { transition-delay: 0.15s; }
+    .stagger-3 { transition-delay: 0.25s; }
+    .stagger-4 { transition-delay: 0.35s; }
+    .stagger-5 { transition-delay: 0.45s; }
+    .stagger-6 { transition-delay: 0.55s; }
+  </style>
 </head>
 <body>
 
-<h1>Client Albums</h1>
+  <!-- ─── HEADER ──────────────────────────────────────────── -->
+  <header>
+    <a href="#" class="logo">BHARG<span>O</span>BJYOTI</a>
 
-<ul>
-    <li><a href="rahul.html">Rahul Wedding</a></li>
-    <li><a href="priya.html">Priya Shoot</a></li>
-</ul>
+    <nav id="nav">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#journal">Journal</a>
+      <a href="#contact" class="nav-cta">Book a Session</a>
+    </nav>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- ─── HERO ─────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Moments That Last Forever</p>
+      <h1>Memories<br>
+        <em>by</em><br>
+        Bhargob.
+      </h1>
+      <p class="hero-sub">We craft images that outlast the occasion — portraits, weddings, and editorial work rooted in stillness and light.</p>
+      <div class="hero-actions">
+        <a href="#work" class="btn-primary">
+          View Portfolio
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#contact" class="btn-ghost">
+          Book a session <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ─── STATS ─────────────────────────────────────────────── -->
+  <!-- <div class="stats">
+    <div class="stat fade-up stagger-1">
+      <div class="stat-num">8<span>k+</span></div>
+      <div class="stat-label">Photos Delivered</div>
+    </div>
+    <div class="stat fade-up stagger-2">
+      <div class="stat-num">340<span>+</span></div>
+      <div class="stat-label">Happy Clients</div>
+    </div>
+    <div class="stat fade-up stagger-3">
+      <div class="stat-num">12<span>yr</span></div>
+      <div class="stat-label">Experience</div>
+    </div>
+    <div class="stat fade-up stagger-4">
+      <div class="stat-num">18<span>+</span></div>
+      <div class="stat-label">Awards Won</div>
+    </div>
+  </div> -->
+
+  <!-- ─── ALBUM GRID ─────────────────────────────────────────── -->
+  <section class="section" id="work">
+    <div class="section-header fade-up">
+      <div>
+        <p class="section-label">Portfolio</p>
+        <h2 class="section-title">Recent <em>Albums</em></h2>
+      </div>
+      <a href="#" class="view-all">
+        All Albums
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <div class="grid">
+      <!-- ── HOW TO EDIT ──────────────────────────────────────
+           Replace the src of each <img> with your Google Drive thumbnail URL.
+           Format: https://drive.google.com/thumbnail?id=FILE_ID&sz=w800
+           Edit client name, category, and date in each .card block.
+      ─────────────────────────────────────────────────────── -->
+      <!-- paridhi's rice ceremony -->
+      <a href="paridhi.html"> 
+       <div class="card fade-up stagger-1">
+        <div class="card-image">
+          <span class="card-badge">Editorial</span>
+          <img src="https://drive.google.com/thumbnail?id=1HStbJF01YuyuJiGqFVkvG-gDC9-uQnao&sz=w800" alt="Album preview" loading="lazy" />
+          <div class="card-overlay">
+            <span class="overlay-view">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View Album
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="card-client">Paridhi's Rice Ceremony</div>
+            <div class="card-meta">April 2026</div>
+          </div>
+          <div class="card-icon">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Card 1 — Featured -->
+      <div class="card featured fade-up stagger-1">
+        <div class="card-image">
+          <span class="card-badge">Wedding</span>
+          <img src="https://drive.google.com/thumbnail?id=1zrMdqItJaUwfHGvkRmmD_vIOpIMDlIHF&sz=w800" alt="Album preview" loading="lazy" />
+          <div class="card-overlay">
+            <span class="overlay-view">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View Album
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="card-client">Santana’s Wedding Ceremony</div>
+            <div class="card-meta">Wedding· Sivasagar, Assam</div>
+          </div>
+          <div class="card-icon">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card fade-up stagger-2">
+        <div class="card-image">
+          <span class="card-badge">Portrait</span>
+          <img src="https://drive.google.com/thumbnail?id=1ezpJH827OFksueTNgJU7qdY8eXhFzXx8&sz=w800" alt="Album preview" loading="lazy" />
+          <div class="card-overlay">
+            <span class="overlay-view">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View Album
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="card-client">PRIYA DAS</div>
+            <div class="card-meta">·Outdoor Session</div>
+          </div>
+          <div class="card-icon">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card fade-up stagger-3">
+        <div class="card-image">
+          <!-- <span class="card-badge">Family</span> -->
+          <img src="https://drive.google.com/thumbnail?id=1OdUQQ5YUWeRtlYtwwqSQnSMjLL2ppKzJ&sz=w800" alt="Album preview" loading="lazy" />
+          <div class="card-overlay">
+            <span class="overlay-view">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View Album
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="card-client">Marami Dutta</div>
+            <div class="card-meta">Baby Shoot· Sivasagar, Assam</div>
+          </div>
+          <div class="card-icon">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+       <!-- bhagyashree outdoor -->
+      <div class="card fade-up stagger-4">
+        <div class="card-image">
+          <span class="card-badge">Editorial</span>
+          <img src="https://drive.google.com/thumbnail?id=1xRE2KcxB73SVssgkW1jvCjx2oPT9qBgz&sz=w800" alt="Album preview" loading="lazy" />
+          <div class="card-overlay">
+            <span class="overlay-view">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View Album
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="card-client">Bhagyashree Borah</div>
+            <div class="card-meta">Outdoorshoot · Bihu</div>
+          </div>
+          <div class="card-icon">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5
+      <div class="card fade-up stagger-5">
+        <div class="card-image">
+          <span class="card-badge">Wedding</span>
+          <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=800&auto=format&fit=crop&q=80" alt="Album preview" loading="lazy" />
+          <div class="card-overlay">
+            <span class="overlay-view">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View Album
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="card-client">Priya & Rahul</div>
+            <div class="card-meta">February 2025 · Mumbai</div>
+          </div>
+          <div class="card-icon">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      Card 6
+      <div class="card fade-up stagger-6">
+        <div class="card-image">
+          <span class="card-badge">Newborn</span>
+          <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?w=800&auto=format&fit=crop&q=80" alt="Album preview" loading="lazy" />
+          <div class="card-overlay">
+            <span class="overlay-view">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View Album
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="card-client">The Laurent Baby</div>
+            <div class="card-meta">January 2025 · In-home</div>
+          </div>
+          <div class="card-icon">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- </section> -->
+
+  <!-- ─── TESTIMONIAL ────────────────────────────────────────── -->
+  <!-- <section class="testimonial-section" id="about">
+    <div class="testimonial-img fade-up">
+      <img src="https://images.unsplash.com/photo-1554080353-a576cf803bda?w=800&auto=format&fit=crop&q=80" alt="Behind the lens" />
+      <div class="img-tag">
+        <div class="img-tag-num">12</div>
+        <div class="img-tag-label">Years in art</div>
+      </div>
+    </div>
+    <div class="testimonial-content fade-up stagger-2">
+      <p class="section-label">Client Words</p>
+      <blockquote>
+        "Working with LUMEN felt like being seen. Every single frame captures a feeling I thought only I could remember."
+      </blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">I</div>
+        <div>
+          <div class="author-name">Isabelle Moreau</div>
+          <div class="author-role">Bride · Tuscany Wedding 2025</div>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- test card
+        <div class="card featured fade-up stagger-1">
+        <div class="card-image">
+          <span class="card-badge">Wedding</span>
+          <img src="https://drive.google.com/thumbnail?id=1zrMdqItJaUwfHGvkRmmD_vIOpIMDlIHF&sz=w800" alt="Album preview" loading="lazy" />
+          <div class="card-overlay">
+            <span class="overlay-view">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View Album
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="card-client">Santana’s Wedding Ceremony</div>
+            <div class="card-meta">Wedding· Sivasagar, Assam</div>
+          </div>
+          <div class="card-icon">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div> -->
+
+  </section>
+
+  <!-- ─── FOOTER ─────────────────────────────────────────────── -->
+  <footer id="contact">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="logo">BHARG<span>O</span>BJYOTI</a>
+        <p class="footer-tagline">We craft images that outlast the occasion — portraits, weddings, and editorial work rooted in stillness and light.</p>
+        <div class="footer-social">
+          <!-- Instagram -->
+          <a href="#" class="social-link" aria-label="Instagram">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+          </a>
+          <!-- Pinterest -->
+          <a href="#" class="social-link" aria-label="Pinterest">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.98.04-2.83.19-.77 1.27-5.38 1.27-5.38s-.32-.65-.32-1.61c0-1.51.88-2.64 1.97-2.64.93 0 1.38.7 1.38 1.54 0 .94-.6 2.34-.91 3.64-.26 1.09.54 1.97 1.61 1.97 1.93 0 3.42-2.03 3.42-4.97 0-2.6-1.87-4.42-4.53-4.42-3.08 0-4.89 2.31-4.89 4.7 0 .93.36 1.93.8 2.47a.32.32 0 0 1 .07.31c-.08.34-.27 1.09-.3 1.24-.05.2-.16.24-.37.15-1.4-.65-2.27-2.7-2.27-4.35 0-3.54 2.57-6.79 7.41-6.79 3.89 0 6.91 2.77 6.91 6.47 0 3.86-2.43 6.96-5.81 6.96-1.13 0-2.2-.59-2.57-1.28l-.7 2.6c-.25.97-.93 2.18-1.39 2.92C10.68 21.96 11.33 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>
+          </a>
+          <!-- Facebook -->
+          <a href="#" class="social-link" aria-label="Facebook">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+          <!-- Email -->
+          <a href="mailto:hello@lumenphotography.com" class="social-link" aria-label="Email">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="#work">Portfolio</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#journal">Journal</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#">Weddings</a></li>
+          <li><a href="#">Portraits</a></li>
+          <li><a href="#">Editorial</a></li>
+          <li><a href="#">Newborn</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:bhargobjyoti6000@gmail.com">bhargobjyoti6000@gmail.com</a></li>
+          <li><a href="tel:+918822485089">+91 88224 85089</a></li>
+          <li><a href="#">Book a Session</a></li>
+          <!-- <li><a href="#">Gift Cards</a></li> -->
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2025 BHARGOBJYOTI. All rights reserved.</span>
+      <span>
+        <a href="#">Privacy Policy</a> &nbsp;·&nbsp;
+        <a href="#">Terms</a>
+      </span>
+    </div>
+  </footer>
+
+  <!-- ─── SCRIPTS ────────────────────────────────────────────── -->
+  <script>
+    /* ── Mobile nav toggle ── */
+    const toggle = document.getElementById('navToggle');
+    const nav    = document.getElementById('nav');
+    toggle.addEventListener('click', () => {
+      nav.classList.toggle('open');
+    });
+
+    /* ── Scroll-triggered entrance animations ── */
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    /* ── Header shadow on scroll ── */
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', () => {
+      header.style.background = window.scrollY > 40
+        ? 'rgba(14,14,13,0.97)'
+        : 'rgba(14,14,13,0.85)';
+    });
+  </script>
 
 </body>
 </html>
