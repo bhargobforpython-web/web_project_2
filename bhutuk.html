@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BHARGOBJYOTI — Client Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ════════════════════════════════════════════════════════════
+       DESIGN TOKENS — same as homepage, do not edit
+    ════════════════════════════════════════════════════════════ */
+    :root {
+      --bg:        #0e0e0d;
+      --surface:   #161614;
+      --border:    rgba(255,255,255,0.07);
+      --text:      #e8e2d9;
+      --muted:     #7a7670;
+      --gold:      #c9a96e;
+      --gold-dim:  rgba(201,169,110,0.15);
+      --white:     #f5f0e8;
+      --radius:    4px;
+      --ease:      cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       RESET
+    ════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; }
+    button { cursor: pointer; font-family: inherit; }
+
+    /* ════════════════════════════════════════════════════════════
+       GRAIN OVERLAY — same as homepage
+    ════════════════════════════════════════════════════════════ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       HEADER — identical to homepage
+    ════════════════════════════════════════════════════════════ */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4rem;
+      height: 72px;
+      background: rgba(14,14,13,0.85);
+      backdrop-filter: blur(18px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s var(--ease);
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .logo span { color: var(--gold); }
+
+    nav { display: flex; gap: 2.5rem; align-items: center; }
+    nav a {
+      font-size: 0.78rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      position: relative;
+      transition: color 0.25s;
+    }
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 0; height: 1px;
+      background: var(--gold);
+      transition: width 0.3s var(--ease);
+    }
+    nav a:hover { color: var(--white); }
+    nav a:hover::after { width: 100%; }
+
+    .nav-cta {
+      padding: 0.45rem 1.2rem;
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      color: var(--gold) !important;
+      font-size: 0.75rem !important;
+      letter-spacing: 0.14em !important;
+      transition: background 0.25s, color 0.25s !important;
+    }
+    .nav-cta:hover { background: var(--gold); color: var(--bg) !important; }
+    .nav-cta::after { display: none !important; }
+
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      flex-direction: column;
+      gap: 5px;
+      padding: 4px;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 24px; height: 1px;
+      background: var(--text);
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       LOGIN SCREEN
+    ════════════════════════════════════════════════════════════ */
+    #loginScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+    }
+    #loginScreen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-20px);
+    }
+
+    /* decorative background for login */
+    #loginScreen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(201,169,110,0.06), transparent),
+        radial-gradient(ellipse 50% 40% at 80% 20%, rgba(201,169,110,0.04), transparent);
+      pointer-events: none;
+    }
+
+    .login-box {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3rem 3.5rem;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+      animation: loginFadeIn 0.8s var(--ease) both;
+    }
+    @keyframes loginFadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* gold top accent line */
+    .login-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .login-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.5rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 0.4rem;
+      text-align: center;
+    }
+    .login-logo span { color: var(--gold); }
+
+    .login-subtitle {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .login-divider {
+      width: 36px; height: 1px;
+      background: var(--gold);
+      margin: 0 auto 2.5rem;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin-bottom: 1.4rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.55rem;
+    }
+    .form-group input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 300;
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .form-group input::placeholder { color: var(--muted); opacity: 0.5; }
+    .form-group input:focus {
+      border-color: rgba(201,169,110,0.5);
+      background: rgba(201,169,110,0.04);
+    }
+
+    .login-btn {
+      width: 100%;
+      margin-top: 2rem;
+      padding: 0.9rem;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transition: background 0.25s, transform 0.2s;
+    }
+    .login-btn:hover { background: #d4b57e; transform: translateY(-2px); }
+    .login-btn:active { transform: translateY(0); }
+
+    .login-error {
+      margin-top: 1rem;
+      font-size: 0.78rem;
+      color: #e07070;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .login-error.show { opacity: 1; }
+
+    .login-hint {
+      margin-top: 1.5rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      opacity: 0.7;
+      line-height: 1.8;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       GALLERY PAGE — hidden until login
+    ════════════════════════════════════════════════════════════ */
+    #galleryPage {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.6s var(--ease);
+    }
+    #galleryPage.visible {
+      display: block;
+      opacity: 1;
+    }
+
+    /* ── Album Hero ── */
+    .album-hero {
+      padding: 4rem 4rem 3rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .album-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .album-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 28px; height: 1px;
+      background: var(--gold);
+    }
+
+    .album-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--white);
+      line-height: 1.1;
+    }
+    /* ✏️  EDIT: Change album name below in the HTML section */
+    .album-title em { font-style: italic; color: var(--gold); }
+
+    .album-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .album-meta span { display: flex; align-items: center; gap: 0.4rem; }
+
+    /* ── Action buttons ── */
+    .album-actions { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.6rem;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: background 0.25s, transform 0.2s;
+    }
+    .btn-primary:hover { background: #d4b57e; transform: translateY(-2px); }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.73rem 1.4rem;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: border-color 0.25s, color 0.25s, background 0.25s;
+    }
+    .btn-outline:hover {
+      border-color: rgba(201,169,110,0.4);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    .btn-outline.active {
+      border-color: rgba(201,169,110,0.5);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    /* ── Logout ── */
+    .btn-logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.25s, border-color 0.25s;
+    }
+    .btn-logout:hover { color: #e07070; border-color: rgba(224,112,112,0.3); }
+
+    /* ════════════════════════════════════════════════════════════
+       GALLERY GRID
+    ════════════════════════════════════════════════════════════ */
+    .gallery-container {
+      padding: 3rem 4rem 6rem;
+    }
+
+    /* filter / view bar */
+    .gallery-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .gallery-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+    .gallery-count strong { color: var(--gold); font-weight: 400; }
+
+    /* Masonry-style responsive grid */
+    .gallery-grid {
+      columns: 4;
+      column-gap: 1rem;
+    }
+    @media (max-width: 1200px) { .gallery-grid { columns: 3; } }
+    @media (max-width: 768px)  { .gallery-grid { columns: 2; } }
+    @media (max-width: 480px)  { .gallery-grid { columns: 1; } }
+
+    /* ── Individual image tile ── */
+    .gallery-tile {
+      break-inside: avoid;
+      margin-bottom: 1rem;
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), border-color 0.3s;
+    }
+    .gallery-tile:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(201,169,110,0.18);
+      border-color: rgba(201,169,110,0.2);
+    }
+
+    /* image skeleton / loader */
+    .tile-img-wrap {
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .tile-img-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+      animation: shimmer 1.8s infinite;
+      z-index: 1;
+    }
+    .tile-img-wrap.loaded::before { display: none; }
+
+    @keyframes shimmer {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .gallery-tile img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;       /* cover for grid — no cropping of image area */
+      display: block;
+      filter: brightness(0.93) saturate(0.88);
+      transition: filter 0.4s, transform 0.5s var(--ease);
+      /* blur-in load effect */
+      filter: blur(8px) brightness(0.7);
+    }
+    .gallery-tile img.loaded {
+      filter: brightness(0.93) saturate(0.88);
+      animation: tileReveal 0.5s var(--ease) both;
+    }
+    @keyframes tileReveal {
+      from { filter: blur(6px) brightness(0.7); }
+      to   { filter: brightness(0.93) saturate(0.88); }
+    }
+    .gallery-tile:hover img { filter: brightness(1) saturate(1.05); transform: scale(1.04); }
+
+    /* hover overlay */
+    .tile-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(14,14,13,0.88) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.35s var(--ease);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.2rem;
+      gap: 0.6rem;
+      z-index: 2;
+    }
+    .gallery-tile:hover .tile-overlay { opacity: 1; }
+
+    .tile-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transform: translateY(8px);
+      transition: transform 0.35s var(--ease);
+    }
+    .gallery-tile:hover .tile-actions { transform: translateY(0); }
+
+    .tile-index {
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+
+    .tile-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid rgba(201,169,110,0.35);
+      border-radius: 20px;
+      background: rgba(14,14,13,0.6);
+      backdrop-filter: blur(8px);
+      color: var(--gold);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .tile-btn:hover { background: var(--gold-dim); border-color: var(--gold); }
+
+    /* number badge */
+    .tile-num {
+      position: absolute;
+      top: 0.8rem;
+      left: 0.8rem;
+      background: rgba(14,14,13,0.65);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      z-index: 3;
+      transition: color 0.3s;
+    }
+    .gallery-tile:hover .tile-num { color: var(--gold); }
+
+    /* ════════════════════════════════════════════════════════════
+       LIGHTBOX
+    ════════════════════════════════════════════════════════════ */
+    #lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(8,8,7,0.97);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s var(--ease);
+    }
+    #lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* top bar */
+    .lb-topbar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      background: linear-gradient(to bottom, rgba(8,8,7,0.9), transparent);
+      z-index: 10;
+    }
+
+    .lb-counter {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--white);
+    }
+    .lb-counter em { color: var(--gold); font-style: italic; }
+
+    .lb-top-actions { display: flex; align-items: center; gap: 0.6rem; }
+
+    .lb-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      width: auto;
+      padding: 0.5rem 0.9rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius);
+      color: var(--muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .lb-btn:hover { background: rgba(255,255,255,0.12); color: var(--white); }
+    .lb-btn.active { background: var(--gold-dim); border-color: rgba(201,169,110,0.4); color: var(--gold); }
+
+    .lb-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      color: var(--muted);
+      font-size: 1.2rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .lb-close:hover { background: rgba(224,112,112,0.15); color: #e07070; border-color: rgba(224,112,112,0.3); }
+
+    /* main image area */
+    .lb-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 72px 80px 80px;
+    }
+
+    .lb-img-wrap {
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    #lbImage {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;   /* CONTAIN — shows full image, no cropping of faces */
+      border-radius: 4px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.7);
+      transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+    }
+    #lbImage.switching {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+
+    /* nav arrows */
+    .lb-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 52px; height: 52px;
+      background: rgba(14,14,13,0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 1.1rem;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+      z-index: 20;
+    }
+    .lb-arrow:hover {
+      background: rgba(201,169,110,0.15);
+      color: var(--gold);
+      border-color: rgba(201,169,110,0.3);
+      transform: translateY(-50%) scale(1.08);
+    }
+    .lb-prev { left: 1.2rem; }
+    .lb-next { right: 1.2rem; }
+
+    /* bottom bar */
+    .lb-bottombar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      background: linear-gradient(to top, rgba(8,8,7,0.9), transparent);
+      z-index: 10;
+    }
+
+    /* thumbnail strip */
+    .lb-thumbs {
+      position: absolute;
+      bottom: 72px; left: 0; right: 0;
+      display: flex;
+      gap: 6px;
+      padding: 0 1.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      justify-content: center;
+    }
+    .lb-thumbs::-webkit-scrollbar { display: none; }
+
+    .lb-thumb {
+      flex-shrink: 0;
+      width: 48px; height: 36px;
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid transparent;
+      cursor: pointer;
+      opacity: 0.45;
+      transition: opacity 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .lb-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .lb-thumb:hover { opacity: 0.75; transform: translateY(-2px); }
+    .lb-thumb.active {
+      opacity: 1;
+      border-color: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    /* slideshow progress bar */
+    .lb-progress {
+      position: absolute;
+      top: 64px; left: 0;
+      height: 2px;
+      background: var(--gold);
+      width: 0%;
+      transition: width linear;
+      z-index: 10;
+      opacity: 0;
+    }
+    .lb-progress.running { opacity: 1; }
+
+    /* ════════════════════════════════════════════════════════════
+       FOOTER — identical to homepage
+    ════════════════════════════════════════════════════════════ */
+    footer {
+      margin-top: 2rem;
+      border-top: 1px solid var(--border);
+      padding: 4rem 4rem 2.5rem;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 4rem;
+    }
+    .footer-brand .logo { font-size: 1.4rem; margin-bottom: 1rem; }
+    .footer-tagline { font-size: 0.85rem; color: var(--muted); line-height: 1.8; max-width: 260px; }
+    .footer-social { display: flex; gap: 0.8rem; margin-top: 1.8rem; }
+    .social-link {
+      width: 38px; height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: border-color 0.25s, color 0.25s, background 0.25s;
+    }
+    .social-link:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+    .footer-col h4 {
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-col li a { font-size: 0.85rem; color: var(--muted); transition: color 0.2s; }
+    .footer-col li a:hover { color: var(--gold); }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .footer-bottom a { color: var(--muted); transition: color 0.2s; }
+    .footer-bottom a:hover { color: var(--gold); }
+
+    /* ════════════════════════════════════════════════════════════
+       RESPONSIVE
+    ════════════════════════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      header { padding: 0 1.5rem; }
+      nav { display: none; flex-direction: column; position: fixed; inset: 72px 0 0; background: var(--bg); padding: 2rem; gap: 1.5rem; }
+      nav.open { display: flex; }
+      nav a { font-size: 1rem; }
+      .nav-toggle { display: flex; }
+      .album-hero { padding: 2.5rem 1.5rem 2rem; }
+      .gallery-container { padding: 2rem 1.2rem 4rem; }
+      .lb-stage { padding: 64px 60px 120px; }
+      .lb-arrow { width: 40px; height: 40px; }
+      .lb-thumbs { bottom: 64px; }
+      .lb-thumb { width: 36px; height: 28px; }
+      .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+      footer { padding: 3rem 1.5rem 2rem; }
+      .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+      .login-box { padding: 2.5rem 2rem; }
+      .album-actions { gap: 0.5rem; }
+    }
+    @media (max-width: 480px) {
+      .lb-stage { padding: 64px 48px 110px; }
+      .lb-prev { left: 0.4rem; }
+      .lb-next { right: 0.4rem; }
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       FADE-UP ANIMATION
+    ════════════════════════════════════════════════════════════ */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.65s var(--ease), transform 0.65s var(--ease);
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* ════════════════════════════════════════════════════════════
+       TOAST NOTIFICATION
+    ════════════════════════════════════════════════════════════ */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface);
+      border: 1px solid rgba(201,169,110,0.3);
+      border-radius: var(--radius);
+      padding: 0.75rem 1.5rem;
+      font-size: 0.8rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 2000;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─────────────────────────────────────────────────────────
+       TOAST NOTIFICATION
+  ───────────────────────────────────────────────────────────── -->
+  <div id="toast"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LOGIN SCREEN
+       ✏️  EDIT: Change username and password in the JS section
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="loginScreen">
+    <div class="login-box">
+      <!-- Brand -->
+      <div class="login-logo">BHARG<span>O</span>BJYOTI</div>
+      <p class="login-subtitle">Private Client Gallery</p>
+      <div class="login-divider"></div>
+
+      <!-- Form -->
+      <div class="form-group">
+        <label for="username">Your Name / Client ID</label>
+        <input type="text" id="username" placeholder="e.g. santana" autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label for="password">Access Password</label>
+        <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" />
+      </div>
+
+      <button class="login-btn" onclick="handleLogin()">
+        Access My Gallery &nbsp;→
+      </button>
+
+      <p class="login-error" id="loginError">Incorrect credentials. Please try again.</p>
+
+      <p class="login-hint">
+        Your gallery link &amp; password were sent to you by email.<br>
+        Having trouble? Contact <a href="tel:1234567890" style="color:var(--gold)">+91 88224 85089</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       GALLERY PAGE (shown after login)
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="galleryPage">
+
+    <!-- ── HEADER ─────────────────────────────────────────── -->
+    <header id="siteHeader">
+      <a href="index.html" class="logo">BHARG<span>O</span>BJYOTI</a>
+
+      <nav id="nav">
+        <a href="index.html">Home</a>
+        <a href="index.html#work">Portfolio</a>
+        <a href="index.html#contact">Contact</a>
+        <button class="btn-logout" onclick="handleLogout()">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+          Log Out
+        </button>
+      </nav>
+
+      <button class="nav-toggle" id="navToggle" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <!-- ── ALBUM HERO ──────────────────────────────────────── -->
+    <div class="album-hero fade-up">
+      <div>
+        <p class="album-eyebrow" id="albumCategory">wedding</p>
+        <!-- ✏️  EDIT: Change the album title here -->
+        <h1 class="album-title" id="albumTitle">
+          Dibyanjana's<em>Wedding</em><br>Ceremony
+        </h1>
+        <div class="album-meta">
+          <!-- ✏️  EDIT: Change date and location -->
+          <span>
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            July 2026
+          </span>
+          <span>
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Gaurisagar,Sivasagar, Assam
+          </span>
+          <span id="imageCountDisplay">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            <span id="totalCount">0</span> Photos
+          </span>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="album-actions">
+        <button class="btn-outline" id="slideshowToggleTop" onclick="toggleSlideshow()">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Slideshow
+        </button>
+        <!-- <button class="btn-primary" onclick="downloadAll()">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Download All -->
+        </button>
+      </div>
+    </div>
+
+    <!-- ── GALLERY GRID ────────────────────────────────────── -->
+    <div class="gallery-container">
+      <div class="gallery-bar fade-up">
+        <p class="gallery-count">
+          Showing <strong id="shownCount">0</strong> photos — click any to view full size
+        </p>
+      </div>
+
+      <!-- ✏️  Images are injected here by JavaScript -->
+      <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+
+    <!-- ── FOOTER ──────────────────────────────────────────── -->
+    <footer id="contact">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <!-- ✏️  EDIT: Update brand name here if needed -->
+          <a href="index.html" class="logo">BHARG<span>O</span>BJYOTI</a>
+          <p class="footer-tagline">We craft images that outlast the occasion — portraits, weddings, and editorial work rooted in stillness and light.</p>
+          <div class="footer-social">
+            <a href="#" class="social-link" aria-label="Instagram">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+            </a>
+            <a href="#" class="social-link" aria-label="Facebook">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+            <a href="mailto:bhargobjyoti6000@gmail.com" class="social-link" aria-label="Email">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Navigate</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#work">Portfolio</a></li>
+            <li><a href="index.html#about">About</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="#">Weddings</a></li>
+            <li><a href="#">Portraits</a></li>
+            <li><a href="#">Editorial</a></li>
+            <li><a href="#">Newborn</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:bhargobjyoti6000@gmail.com">bhargobjyoti6000@gmail.com</a></li>
+            <li><a href="tel:+918822485089">+91 88224 85089</a></li>
+            <li><a href="index.html#contact">Book a Session</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 BHARGOBJYOTI. All rights reserved.</span>
+        <span><a href="#">Privacy Policy</a> &nbsp;·&nbsp; <a href="#">Terms</a></span>
+      </div>
+    </footer>
+
+  </div><!-- /galleryPage -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LIGHTBOX
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+
+    <!-- Progress bar (slideshow) -->
+    <div class="lb-progress" id="lbProgress"></div>
+
+    <!-- Top bar -->
+    <div class="lb-topbar">
+      <div class="lb-counter">
+        <span id="lbCurrent">1</span> <em>/</em> <span id="lbTotal">1</span>
+      </div>
+      <div class="lb-top-actions">
+        <button class="lb-btn" id="lbSlideshowBtn" onclick="toggleSlideshow()" title="Slideshow">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Slideshow
+        </button>
+        <button class="lb-btn" onclick="downloadCurrent()" title="Download this photo">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Download
+        </button>
+        <button class="lb-close" onclick="closeLightbox()" title="Close (Esc)">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main stage -->
+    <div class="lb-stage">
+      <div class="lb-img-wrap">
+        <!-- object-fit: contain — full image visible, no face cropping -->
+        <img id="lbImage" src="" alt="Gallery photo" />
+      </div>
+    </div>
+
+    <!-- Arrows -->
+    <button class="lb-arrow lb-prev" onclick="lbNavigate(-1)" title="Previous (←)">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="lb-arrow lb-next" onclick="lbNavigate(1)" title="Next (→)">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+
+    <!-- Thumbnail strip -->
+    <div class="lb-thumbs" id="lbThumbs"></div>
+
+    <!-- Bottom bar -->
+    <div class="lb-bottombar">
+      <span style="font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;">
+        USE ← → KEYS OR SWIPE TO NAVIGATE
+      </span>
+      <!-- <button class="lb-btn" onclick="downloadAll()">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Download All
+      </button>
+    </div>
+  </div>/lightbox -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       JAVASCRIPT
+  ═══════════════════════════════════════════════════════════ -->
+  <script>
+  /* ══════════════════════════════════════════════════════════════
+     ✏️  SECTION 1 — CLIENT CREDENTIALS
+     Add as many clients as needed in this format.
+     username: what the client types in the Name field
+     password: what the client types in the Password field
+  ══════════════════════════════════════════════════════════════ */
+  const CLIENTS = [
+    
+    { username: "dibyanjana",     password: "dibyanjana"     },
+    /* ← Add more clients here:
+       { username: "clientname", password: "theirpassword" }, */
+  ];
+
+  /* ══════════════════════════════════════════════════════════════
+     ✏️  SECTION 2 — ALBUM CONFIGURATION
+     One album per client (or one shared album for all).
+     You can also expand this to per-client albums later.
+
+     HOW TO GET YOUR GOOGLE DRIVE FILE IDs:
+     1. Upload image to Google Drive
+     2. Right-click → "Share" → "Anyone with link"
+     3. Copy link: https://drive.google.com/file/d/FILE_ID_HERE/view
+     4. Paste just the FILE_ID below.
+
+     The page will load images using:
+     https://drive.google.com/thumbnail?id=FILE_ID&sz=w1600
+  ══════════════════════════════════════════════════════════════ */
+
+  /* ✏️  ALBUM META — shown in the hero section */
+  const ALBUM = {
+    title:    "Dibyanjana's Wedding Ceremony",   /* displayed in title */
+    titleItalic: "Dibyanjana's Wedding Ceremony",                   /* the italic word in title */
+    category: "Wedding",                      /* badge / eyebrow label */
+    // date:     "July 2026",
+    // location: "Gaurisagar, Sivasagar, Assam",
+  };
+
+  /* ✏️  IMAGE FILE IDs — replace with YOUR Google Drive file IDs */
+  const IMAGE_IDS = [
+    /* ─── Paste your Google Drive File IDs here ─────────────── */
+    "1y2hsAu_yaKsxZqyTAJE6PSlN0d4jkmMl",
+"1jybs8UmggmgCVXidj39a2j8kbum0_qGG",
+"168q6SD4SLWNy9XJGuUMUFOvyWYyFR23E",
+"1awGJNQ42mwNpP2NnShYemUNrg-BXz6Th",
+"1hrs2rOdfKORYmTKU5Tw8SXnnRzidtJUW",
+"1IlrhYU0ntk09cnlR9dFF4IxS6owB_0UJ",
+"1BLxJx8JUHZbHFXyX_rDaa3QWCj6rbKNP",
+"1EYFjVKQeeClQvtmm7uNY-qM0UaynUr5r",
+"1htdjADFljqr14e-NwXOoNXD1XbzkGT3b",
+"1SuQzNht1lYtCA-djXC2IACgmatw2elTf",
+"1yilhD109lCn6SJO60fJP0oC88CKU5b9e",
+"1fCAgXNNJjhN9-cRb637kwUkPY4-1wvPA",
+"14P-uWrc9cPrzJBJxD8gBbskujmytHMl9",
+"1okEMDzrWabV-LBW2KZHe4vooupRdhOJh",
+"1FXl97HMq1_qGzFNMYdTmG2ydUSJ6lHvS",
+"1IzXUDJm-mkEjsGSVXR8SZ-TS7wZxCrbd",
+"1lCZk58v2KYNVTQSoe4-6eJ1tZ71bJAPt",
+"1jJXnYGqx_NYWEpTKhZXT6qIBvARDoFuf",
+"1ko5Nl0o3yhedNA-5LyaLcCkVbm88j2NW",
+"1_OWI6TO0jKzKsdoiSV7tJJGqa4Zc05K1",
+"1P1DhRqENo5VeMaSAs0iEOFCrWQktM2Va",
+"118QM4PbXnJ1OENoTbm2r7yLEijTppToX",
+"1Ut4IBKphIY7U2R4u1XnmhUEmnH5c0PF3",
+"1cxLyt6qRfaA_T7kgYZeXooY_4njrkP1q",
+"1t2vclPDsjb3v9DoqCIt5zIYQG6_BuvS9",
+"17TMoyJlAvYlreoiGOFJwU6-dzsgQiDz5",
+"1xg6IIvP1BD1epjYMclJ8hk9KjXbNY71s",
+"1Oo7lTI9VQZm5cvelSemhjoOdLVgZeQAw",
+"1lrMewEv7zynyMNnZHRmrfJhsteMH5EJK",
+"14Jl-oCVy8_sKx4TFO4efBJCVsJXo2gN1",
+"1Lyh-axHUy3AZW5W6adQ8tbhdjennzV0a",
+"1FYbGhzIy8CbojS526TY6o28fEIWDfdDY",
+"15r0g21HcdNeuLQ1LFlMsh6ZutpOIqrj5",
+"1G70AprAZ2bz2BaPR5t6tWTpXZDCIfg8k",
+"14bS5WFkUFBFw4Nd8-6SSU7tPDkKCdAPF",
+"1n237b2ORbrrghIX9QZsytsgxPx4O6Gxx",
+"1BA0OcglX6HF4vHGgX32KJ5aCekxwUgxy",
+"1-Pn8RqXq64-1VPaOpwhQNnx56oPGOK7y",
+"1mjL_C8jmXDpu8c0hbdor2blppqSZvQzE",
+"1EVn8D2JY2ZHMRM1iGUUT-bR_TQFunO3j",
+"1uyStDr7lGjpZxW7ZTHHnvsfHwMNB5qnA",
+"1eftEbrEZYkqT0Dg7HqbaqMcD-H5cUXJy",
+"1OjOoKZE77LEnYVM2coaVEMECGHyd2-g_",
+"1m1lUXSugcMUXVrH2ptig5b8ANvtwyF1t",
+"1ykMKDC-wIIPXMEfo5jr_LQzF-pLyfK5H",
+"1wJqSGLlBbIYCtWLHw9h72zPA6mUnpOUH",
+"1VI6QZnK3-n5EehqbxfElBQHNTiKoVqMT",
+"1BEBBBz5KNEz6oP65HPnI26e-pnZ2rmql",
+"1Rz1_CL1ImQ9_Pq8PCPZiZCz8ikQJ2eiO",
+"1k_lzw9YPW3M_UotTxxLo7n4epXOD7l1x",
+"1fl_uTS9PIWLN4y5o8TK1VieqYFNHjnq7",
+"19SdPz6b7Nbh5IxVfgy7kgGv5WhaSCf5b",
+"108MbPaJ_WuKyKJCtihCXmnCa3lnswxG-",
+"1FJ82IjYSmDb27I8gX3x1mneXTECR0nAd",
+"159mAZhrrz6oU5Ptiren0A3R022GDyOOG",
+"1y2-tvqfhm2L3aPLcxDm7T-cZvDvesRv4",
+"1yg9Ifxr3G_2srjJ2dL7BbKWLKDdzgM2b",
+"1CEBE8C4zcOhSSz7g1oweGryI6xOz1hZi",
+"1-2O_VqL4x1H1fmw7dEoRmAwOREjRsBpE",
+"1UiZBB0Zck1aUzIaBB7hgnu-6e6FQGOpP",
+"1LLXS9Gm-jgyi9FhHjqBlMEFZdmayMzaM",
+"1hSNu5CksXuBaiae65dDlV5uRwe-SljVO",
+"1gjwgs_5CsG1AzlGW26joNjESReumNuMT",
+"1B-mg6ku3BWgXzjEwLEWwqL0RczT19Fsg",
+"1-yVHAeL0VV8Iwx__kCZFcefFevPf2sY4",
+"1xmBW6UXfBibA28p07EqKUDh73fh8hSEL",
+"1GMIZqzxD7iAlyGy2ckXUgdDtmoDgFpoZ",
+"1-KpfknDdik6rZMTZJ9cQbH6bze5qa1vW",
+"1hnzNDZSk4X0omiXYc0woQy4dFyW4hWqA",
+"1GlmuUkaAf2hRczB3mnjVz1kkpDGLPPYq",
+"1qOueSSZLbPioluu7O0PXZaHWaKmjtHqw",
+"1INrNc140zkBK5G3S2Xj-yqcMav1Oj7aS",
+"1plXKLnR-oLLaIF-rcMzf-SSfQ31iTwjg",
+"1c7MkxrWESv4h5VPlUM4ATjDiDKLVg9bu",
+"1Cz8GdEtCr-srJN5FumXifw56Koi8NzcP",
+"1vVkGmklmgt-BC36pFVnnwdKxNdHeh9Fz",
+"1K5cAKIpT_wlZSxjvkRnB3SyUXEIEBCRB",
+"1jPYFcKhxuQxwwdD2x-E2ryjFEgIzevde",
+"1Vz-qW9_6Mp_6jQaOCKOp61DAGBegdhcA",
+"1qWrmHmXNFU4l8RLTu9QT1fgCZmYh2PyU",
+"1acOYd4FulAhAKkEruHE0eaKbUu0tMBeC",
+"1jZ8mBEprr-efH5QmNkup1FYS9WTUGp50",
+"1rKapslEjD8AjAi6_09IbT_jA0vqTtXDP",
+"1U74ky7VPrinFPq1CAWbS5qHW0_E-jiAZ",
+"1jFCIo35t4irFJ0dmO3GsU_g2ADGAo8sr",
+"1i2rpV1lfsC3Ih8oSK2gtn7cRYYSF12pQ",
+"1cXQ0U7MB6B9AqutFtYiRpII9uMaxpNBH",
+"1HnY__X2ZmT4gByt2UOfE5v-ICdz11oS_",
+"1ztMiSp5WQGzgWrnic2g-w6a2PYM7JRjZ",
+"18QgHWUekh1fKANdcwS1qZjFEQN3hJ0CI",
+"141OQtxjb9sYQf9XgGhUlQl4RxQhpaPd_",
+"1fHMdRf27xtJbnYvwPBXo5TjdbP9uwpCK",
+"1jhHlNTHM2hWYPhQTPbw5PycQoFPlDRKr",
+"1xZ0oJbwIXH5KXJVCcQ3iRWkQWmDdw4WE",
+"1E4fT8FfkuqEggJCs5t84DydEvLybGI6J",
+"1fpoQHdVyah-9hbOuO-yfuRfEpiJmX5zk",
+"1otrRhgupnt9C6jojPpB6Fv1yFvNmOKin",
+"1g41yQUBt-anF4FEM4keGtpUZ64BSqegn",
+"1OrMMJzdc_h8RUHnpjgQe0UPlS1EbHW4T",
+"1wP0eg42WQiNSo06h09x4Yf7TmFscnKPf",
+"1f7-Bq2WzGhjrWh0tafwEFSvJxHURHzgA",
+"1jM_DbDNcj_CHOpVZTvAz2n_emwi5g4PG",
+"1rLNTIoV_0mzPfeBpYR1AeVR9qkcxGMo9",
+"1sSSm1C5nGFmLCjdTbOMHrW64iVYSeE00",
+"1Nw7pO-f2mnlXQygKavuzoO4kjeAx7pwr",
+"1QQhDDjQdlA5G1KpvpE17PHKkMwSVVmFH",
+"1KPDh-ZVOCjABUn1BMvE72aC3_Xnagwlh",
+"1Bkad93H3lRCVdUoG9laH6CfN5nbz0G7f",
+"1wPd_GLCvPG5ZqesB6fr5H2HkdcijYwvn",
+"1ACI0itYei5jSexAhjCgq-eswJWWF2aOE",
+"1ccX1oiprAEBNik9scqiSj40iDMn9gIW8",
+"1VWjdpGiE_OHKRIs_WLl9ExMhvEZ8JIZU",
+"1DqmXUABcYelIs29_BAn-jinPpvqT6DAm",
+"1C0aIaPy-IopnaBaScHADjJgQ32Ebp8LE",
+"1wFQbPxhNITsWGyoqXDAneHUt5Q0GLybH",
+"12upCPs07rIahHgHJ90ShHCp3sLio_ZbK",
+"13_lkCd4p2xXzBp9ZiCaZAe67GX9mqMao",
+"1VMqRYVXkiPsUNsqEVvef7ERhduVw7zzD",
+"1XPSA4_fz05XcHsGG5t56YMbVwj6TJthN",
+"1PVQIi3Vqtr1rFFL8ZjLdGv9OH0TQq_mm",
+"105p_Iocx3jWOvTOLSgbfzxVrsiEU-teD",
+"1q1Lmrh57-zPnQCspG-Jum4FR7acjEJLO",
+"1Ajr-92O31y4FjntF6u9HNhLAcUhpAale",
+"1JxFXdACfkqPPKONVABhBd2QHRU0HhFyX",
+"12rh1ewK6Df0TwXxY-2_aUO7P6Ju6xb_K",
+"1Gv0HMBrjaTq5rIWKQpXe39vEWgY0iGAf",
+"1FPJ0hhdeZW0C14__GbSIMGSjGOW6F2Ow",
+"1FJpKy7wtrtzPvF3KhZWnyIW2TlQ397xO",
+"1wdV0GOv3KPvYZsIK_QZ5ww5g0IuS98xz",
+"1ttib6o7eCXDgg6MGxmiSnqgkDW-A4vUk",
+"1L_MFtKpsVgp9Oy8KGPhT68CMxCaN6UCp",
+"1PGEd9g7FZx4iGaD5SHkzOhq3WjzwO0Un",
+"1o27M4RPxkgQ3gG4IF6r-rU-i78BbPt2j",
+"15GP6kPLjardXv6pqN5PCXuGvP41eECG7",
+"1T90pPGuKSGPMd3WYw-iU_xXBLZV-ICxr",
+"1np9dA_NTv7B0rIGbtzcECnJTQyGoWsO5",
+"1d_i3QuFjD_1zNqXfEfiDpL16KNGCA5Vu",
+"1gTpeE0yanCzOHFa3x_O9MgE2bRtH4iVg",
+"1_3QtsuRSuGWDRsmNYxkkqcLfTnKkOpQR",
+"1rdjFNW-hWq108hchK1mtTtDw9sNJgoEg",
+"1vHxIb10wTHmkZwM4Eo3y8pG7Y0qN9bgW",
+"11K0Okc5pokRJlBl-lZr2NfVyvomPV62t",
+"1JQdVukPi_8cKw-KLM5P_h0k3w72bpQbj",
+"1G9F0kKrNuomPCK0LdK67h8ge_UpKHtKu",
+"1kcvcEBvI0yZv-BGS1fyrxm9EVdsbEI7y",
+"1mjwwrgs9b19gU9Qht0_fDeiYi9TooteM",
+"1WxEw7X2tVRNdu6oAluRrtNMO-RApd5x7",
+"1VljXuNcLCMNioT5cMxQqGZsh-X8Gzh4D",
+"1Nk0DmFZKeyecH2muOWygoNwyWxyFjdHD",
+"1stS0TkckwJWfonutDNYx0WzEy5vdxIkT",
+"1gRnJC_hySuBF2vUBx9TCGaelQrvZeT4m",
+"1aLaEud4oNHHSqHxeIVP323fZJlcvODyT",
+"1UzNJjCrKVJzd4ObDUkrhWD3iEKxQ3i6L",
+"1SSOAZvW-MXsUwGOMJJAL7vNmWrI-gjxN",
+"1-hgsam8mQT7e6UE6HwlYSuNnGZf-bzPS",
+"1P7c0vvzqx7QEV2OP9HpIcP9FG0rdgf8D",
+"1t_HBVKsl_56IClIz0-PYLT4KnJWjPyyk",
+"1BmjTmbeMGjLEzEyPz_HSYZ5JN_gMEVfb",
+"1Kqq_nXMCmxqi4uq9C-HChsOjdQKZEiuo",
+"1kehrFOtxbG3cM3tZTYiNTcVF4Se3CmnI",
+"1b0V5zq5iKg1JvTdPiqpmEpPN99wzG3LO",
+"1ThDoaXwLpQFh_Sp4iVgz3aRUK6CIVSiz",
+"1P606Ac3gg9BF8Yc2FnrzCfQ0KMtERs2h",
+"1OaXf3MUF18GFZiceQC3vRCh9_8JaRYm3",
+"1u9CaObEFEiXh6R2hbbY2EMCFH22kWwBn",
+"1btGq-Di-zqYv8cpF0Vw5u-svDSdE_74Q",
+"1VZ6gQYvyQQvyjOnQtvuEUSgjkRN6yMic",
+"1WmtKfnBegDHj9yz2yQ-2ArDqdufART8m",
+"1lX58az_n7B1qgpT-Vgab5aT4XRbs873o",
+"14Tj4cc-AEdLasrbXkJywlzJp_knee7Nn",
+"129KAQSYJ3aANb15coLExN5QRY3L-vAfG",
+"14qeSDrVlkkOIX1fcFhQm33pY1SdIG8cA",
+"1Z4avhqkfxIxwzYFjrHzbbgwuR0hb-3jq",
+"1MV4CaTN6WK62FgTEY4rbaVm5Ek4z0Xai",
+"1QYXn4jcDTmzAV4NHXCvhYnsuPgCLVx8N",
+"17ZJ46qzTkL7bTKOOUIn1Bu0QSS4Rnyd4",
+"1q2B98x2pXyGm4Z61N6BHXOSfptsFrVIQ",
+"16JCh9_GEKo_-nb9Ja-Z6CKbdoVCX2a-u",
+"1DjyQkyUNoBtk2gljDRFlMTGvg5KXMy0k",
+"1pxDpvwX_xW9BwFvUDDLDsT6iBncp14ez",
+"19yyM0MkAIYc4WTlVVOk9ucLJkHspRj2X",
+"1yfKwHwYNLIxa2LmuN_kWed2Su2CrOfiS",
+"19nzcvvbpj9BJbcALEWOTZbNvfUsQIIoL",
+"1TWoYr2vUZ1PrkkySXvcvqHivtHafvTxM",
+"1Ed4ymSwlN7usKccVuTqHbIAuWeXHOSPZ",
+"18l8yjTXHo9urGldC6SYPbXtAOKZU2Jc4",
+"1tlqIwe8eXqR3AZgLFJSbxw1qxbRnSwgh",
+"1lcyNY02a6wYTNkSQF_VijHjrrPAZbiaA",
+"1wb8ItmpIFVO-cSfdAs-Dgn5-pc__c5c4",
+"1B8HkS9gf7zy_Tmu1QeQnhavfxbSfOi5D",
+"1p8npN75SOK_gR0PMbVB3mRN3c9_sfVRX",
+"1ZK03c8uk26qvA72z77T_CvDhf4u11vCd",
+"1mtYPO0tBFcAQONrWo-I9Qe6LuJeq8TgL",
+"1QdPb3O48phFEysPPIbZfbmsLHoD8g7vW",
+"1Kk9zXevwnaYvCxz-XrMnDiAFoHGLQga3",
+"1zq6MOI-grOPS2vh3_KLMHX93xX_KmgAb",
+"1q3cPl9p1bPc7qLC78UAT25ouZumlGNUG",
+"1asM58RczDuS6_uXgQ9QA7osyxOfDj-_A",
+"10yozu6lEdi5P8trbZt82U21O53a_BNaI",
+"15Gm4OPmuCP0UNVPwv5Q0b1Lj8_Cdq9-P",
+"1NiYtvQNZlWLsmUzCbv1xvbrATdDz_VsY",
+"1eNC1g3W9KWgP4imTOeqPs8eG5kiibidl",
+"1mk-oigY9PKDmrpP_D1E6ke5ERHcoHM4-",
+"1DnqcPei1av8ZJDzIsnJyiMmt_Le3f0mL",
+"1mQKHxint4JZ71XwhHGhZ1Ctrgyqv8Sng",
+"1phv_ub52VZvhSY82SH-TUzHbNebSdzP5",
+"1n9w2is44ORWgL1Dr4J90RQ1RXBQV6qVD",
+"1nUsuwACnoHQjpO2YUs-_VNrJfvMcdWBv",
+"157YrjWMVU2qIccg_H2oaY6nmwFPTlib-",
+"1KXWutf2nSMUUhthwKFezx7Kf9_pZMKmw",
+"1q8LnbGTDlMu1RRkphoG2nFpalb_4ZswN",
+"12pHPbMxza5r-QoDGQCmr8mAX3hAbR_6M",
+"139Y-IXLUYvlDTjLltpnnz8TJtadZLwum",
+"1LqfuEEFoGFaAWb5fmAPa85iMXALw57Hg",
+"17eJlYjL7bnZgYds0dzp1yYgnzdobemcK",
+"1pxAD5HUqI6xf5aexUBF7xfj07XvNjT-z",
+"1Ih_na_roc14ps9Bv8Tjjoi-34Q719yOX",
+"1N2Iw3ppK51Hj4Jn-VbwftPumuyknEEqR",
+"1DAvpBrsKFEooytMWcO7-CbM-IU_IRsDT",
+"1YWS5QBmF5BEG6jclnxATn-2_1hJdNyO6",
+"1E4Q1AzGduGWNLSD_6JxqjnWOjM3oe7ib",
+"1IyDy-grBnS-wuG-Dcn-F2aKpTTTWLE6l",
+"1ni38WSRWBwnEIhKrQFKDIwMXERS1JKF_",
+"1X_Zdwv5sAcswMrbWBwN3az5buy47Shri",
+"1eViwU5bX0HNLud6T_yMaUuKRB4W-wxXO",
+"1QI2EKdck8-RDRwaPeAU8IhT_evvhmty2",
+"1wB8ZvKsxXwATK9OmUNXiXDdC1esyvO2T",
+"1BHQdxt_bHrhLyP18tZdzgC6CiFRLW03U",
+"14qUW42ZRKBV1kiLwPnfWkYIhA052W_6H",
+"1HnwLIkA39G0rNlwW7rgHwFUKIVsIUXXk",
+"1IhaZLpIWf_0Lg3lR9ersDcAEMvGb6_Eu",
+"1vxrshLCXeTTdUSyyq2a4CbcKudBRZ70x",
+"1SQTNFhafe6sQUrWlsMhW_op4ptUNYY-N",
+"1_Q9WYFnBeB4h_rfp1A6PQXem3BiLPNnr",
+"1ui5NdKrwwQ5hYzHLpUkXWptnhjCmTD8e",
+"1zlKA80EVh4ryZVuXWlTwzdtkv4ttUqB9",
+"1HyyRexd2_pqH3TV3wWFKbvap9RyeaiE7",
+"1-t15Fh4Ye2lxMbJsvGri15X3ifk6CMOj",
+"1TfTmXlRGr-K-zCZSpqnI75z4uORdIhbF",
+"1KW3mt4YZARm5KkGShx7oSCkyx1hkDQAS",
+"1nLEOxUWIw0qREFvbR1q1EEvKtuQFhKzZ",
+"1xHiOv5upoFCAr2poFaqWr6rufN__wp8c",
+"1oztS1c7eSxI2wpCrir2qrbfE0kOpeyUy",
+"16_AuL5vhiEaxEIAQUk-Tb-BitCjCWRYf",
+"1SDPDGzUT-F2hfelS43UzN08VNjB8V_bS",
+"17Y2BhXTOL0b7v6fSTQP3A1fREGrbGLr6",
+"1xyiD_PpDhxcUv_T4e7FL0Yw9iWp_hkHx",
+"13FVWCo-pkNAv8veVrNmKvZdcnHuQrljM",
+"1xjSPEv8XuvIYg7P6LnVQbSBhPpulNFjW",
+"1YsxLHCcHBTssCaBJ9eEmY8bX24B_XX2v",
+"1_eg57zSggSe0hyY2GAB__5Pj4eTSuvk1",
+"1n0p5Ab7KWjLt7aACDwf7VVnSFtQHou7j",
+"1cLDClaqPm0T1wqI2pPzSSG31k49fVyNj",
+"1fea4FXc0koBW48TpaGD1dHUTony2rZXB",
+"1iZc2WAeTxXb9jfRQeZQrwS0jSTtF1-5t",
+"1Vbgakdv_4nxMm4JIyThLt5ywhxtUB-3k",
+"1NDuWIjs630fFMX03_ZZGaKl38bj78cdw",
+"1bYX6j8p6KwxkffAQx-0Ia-GazVydPxrD",
+"18rqP2fHoZv4gwF3Y8K_IbwXcLqbD0I7v",
+"1Ihdbw5JozbL9_iTdZLxuuzyvqEShHzIe",
+"1GLw9xEQviCoOZFd4xIy09GMmFMHfdtTs",
+"1bv-yDSeQWrWrgtTYZvGWEsF1NrPXkIwt",
+"1i3At3psy8m6gGq9lBCWKASgaEK-c8dKv",
+"13Pvfa_rS_5-H2MkpHH_RHe4I_pkAT0pP",
+"1vauEhYLXXnPZZUOYa1a1xcYmFu77ZY7P",
+"1H8S7sRnT524Q46S4jYhDB68asrnOD4u6",
+"1gymf2h1zSGVokA1oVW06oTHn4cATNLuY",
+"11ovi-4B6a-FmuXMe2xU9MaMYavBu-76E",
+"1Vo96D2AEBebd2jgSgF6zCtHwv1kr8p5y",
+"1smD1z5LgQhuhMle5frctUhrkrGiaA8Vw",
+"1pzttd0CekcEHQP7hfaxibj7arHo93egQ",
+"1-liicJl_tu-OwWBE3hVCMguKxGyNVNTp",
+"1Ytiw-ZQAhtx_WYbuk_HwIkXlEcQoAxp0",
+"1StRRwDdvz9Hrrfl98IpquArzxTJ2V_Ok",
+"1L9s1NwgaxIBkqai8xwRj8Q16Jc-8Ibcm",
+"1NDZjSZ06bm3d3oMTBf3ny3zR5NbmIHNZ",
+"1_y6y_OvLyLSWstuJbc0xbZvwHS7xj-9i",
+"1XO0020ZS_IFxHQY6MbCyq19YuJ-LLOHR",
+"1d-KmreOHGZFWvwql0IfoDPSSThDFgZ0S",
+"1yZc5R4Q7eB3ir7iiflOXhClmZVcvpIeW",
+"1nB2Qx-mOjuqNLtDV1GHQqCJbSYbZ_YuE",
+"1MItoodcbwzHoh4s44ArVxO_P4df3wkJE",
+"128fglmrkQlnQ30IBvIlY4ttnbFHwq7UK",
+"1ptCdywgawc0Ps8WU0Sh89zEdgwK0vZEY",
+"12qxuEqcjusIaKbB_cKXpmI-ROPNNe5-6",
+"1ryPNpoN4lvrqEq9fbOCXoW5jXEN6CUS6",
+"1VveCVMUkIvV0VDgYGKffSjyD79VqaKl3",
+    /* Image 04 */
+    /* Add as many IDs as you need — just copy the line above   */
+    /* "YOUR_FILE_ID_HERE",                  Image 05 */
+    /* "YOUR_FILE_ID_HERE",                  Image 06 */
+    /* "YOUR_FILE_ID_HERE",                  Image 07 */
+    /* ... */
+  ];
+
+  /* ══════════════════════════════════════════════════════════════
+     ✏️  SECTION 3 — SLIDESHOW SETTINGS
+  ══════════════════════════════════════════════════════════════ */
+  const SLIDESHOW_INTERVAL_MS = 4000;   /* milliseconds per slide (4000 = 4 sec) */
+
+  /* ══════════════════════════════════════════════════════════════
+     INTERNAL — no need to edit below this line
+  ══════════════════════════════════════════════════════════════ */
+
+  /* Build full image URLs */
+  function driveUrl(id, size) {
+    return `https://drive.google.com/thumbnail?id=${id}&sz=${size || 'w1600'}`;
+  }
+
+  /* ── STATE ───────────────────────────────────────────────── */
+  let currentIndex   = 0;
+  let slideshowTimer = null;
+  let isSlideshow    = false;
+  let touchStartX    = 0;
+  let touchEndX      = 0;
+
+  /* ── LOGIN ───────────────────────────────────────────────── */
+  function handleLogin() {
+    const u = document.getElementById('username').value.trim().toLowerCase();
+    const p = document.getElementById('password').value.trim();
+    const err = document.getElementById('loginError');
+
+    const match = CLIENTS.find(c =>
+      c.username.toLowerCase() === u && c.password === p
+    );
+
+    if (match) {
+      err.classList.remove('show');
+      const loginScreen = document.getElementById('loginScreen');
+      loginScreen.classList.add('hidden');
+      setTimeout(() => {
+        loginScreen.style.display = 'none';
+        showGallery();
+      }, 600);
+    } else {
+      err.classList.add('show');
+      /* shake animation */
+      const box = document.querySelector('.login-box');
+      box.style.animation = 'none';
+      box.offsetHeight; /* reflow */
+      box.style.animation = 'shake 0.45s var(--ease)';
+    }
+  }
+
+  function handleLogout() {
+    location.reload();
+  }
+
+  /* Allow Enter key in login form */
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+  document.getElementById('username').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('password').focus();
+  });
+
+  /* ── SHOW GALLERY ────────────────────────────────────────── */
+  function showGallery() {
+    const page = document.getElementById('galleryPage');
+    page.style.display = 'block';
+    setTimeout(() => page.classList.add('visible'), 20);
+
+    /* Update album meta in DOM */
+    document.getElementById('albumCategory').textContent = ALBUM.category;
+    document.getElementById('totalCount').textContent    = IMAGE_IDS.length;
+    document.getElementById('shownCount').textContent    = IMAGE_IDS.length;
+
+    buildGrid();
+    buildLightboxThumbs();
+
+    /* Scroll animations */
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  }
+
+  /* ── BUILD GALLERY GRID ──────────────────────────────────── */
+  function buildGrid() {
+    const grid = document.getElementById('galleryGrid');
+    grid.innerHTML = '';
+
+    IMAGE_IDS.forEach((id, i) => {
+      const tile = document.createElement('div');
+      tile.className = 'gallery-tile';
+      tile.setAttribute('role', 'button');
+      tile.setAttribute('tabindex', '0');
+      tile.setAttribute('aria-label', `Photo ${i + 1}`);
+
+      /* Use w800 for grid thumbnails — faster loading */
+      const src = driveUrl(id, 'w800');
+
+      tile.innerHTML = `
+        <div class="tile-num">${String(i + 1).padStart(2, '0')}</div>
+        <div class="tile-img-wrap" id="wrap-${i}">
+          <img
+            src="${src}"
+            alt="Photo ${i + 1}"
+            loading="lazy"
+            onload="onTileLoad(this, ${i})"
+          />
+        </div>
+        <div class="tile-overlay">
+          <div class="tile-actions">
+            <span class="tile-index">Photo ${String(i + 1).padStart(2, '0')} / ${String(IMAGE_IDS.length).padStart(2, '0')}</span>
+            <div style="display:flex;gap:0.5rem;">
+              <button class="tile-btn" onclick="downloadSingle(event, '${id}', ${i})">
+                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Save
+              </button>
+              <button class="tile-btn" onclick="openLightbox(${i})">
+                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                View
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      /* Click tile → open lightbox */
+      tile.addEventListener('click', (e) => {
+        /* don't trigger if download or view button was clicked */
+        if (e.target.closest('.tile-btn')) return;
+        openLightbox(i);
+      });
+      tile.addEventListener('keydown', e => {
+        if (e.key === 'Enter') openLightbox(i);
+      });
+
+      grid.appendChild(tile);
+    });
+  }
+
+  function onTileLoad(img, i) {
+    img.classList.add('loaded');
+    const wrap = document.getElementById(`wrap-${i}`);
+    if (wrap) wrap.classList.add('loaded');
+  }
+
+  /* ── LIGHTBOX ─────────────────────────────────────────────── */
+  function buildLightboxThumbs() {
+    const container = document.getElementById('lbThumbs');
+    container.innerHTML = '';
+    IMAGE_IDS.forEach((id, i) => {
+      const t = document.createElement('div');
+      t.className = 'lb-thumb';
+      t.id = `thumb-${i}`;
+      t.innerHTML = `<img src="${driveUrl(id, 'w200')}" alt="Thumb ${i+1}" loading="lazy" />`;
+      t.addEventListener('click', () => navigateTo(i));
+      container.appendChild(t);
+    });
+  }
+
+  function openLightbox(index) {
+    currentIndex = index;
+    const lb = document.getElementById('lightbox');
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    loadLbImage(index);
+    updateThumbActive(index);
+    document.getElementById('lbTotal').textContent = IMAGE_IDS.length;
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+    if (isSlideshow) stopSlideshow();
+  }
+
+  function loadLbImage(index) {
+    const img    = document.getElementById('lbImage');
+    const src    = driveUrl(IMAGE_IDS[index], 'w1600');
+
+    img.classList.add('switching');
+    setTimeout(() => {
+      img.src = src;
+      img.onload = () => img.classList.remove('switching');
+      document.getElementById('lbCurrent').textContent = index + 1;
+      updateThumbActive(index);
+    }, 250);
+  }
+
+  function lbNavigate(direction) {
+    const next = (currentIndex + direction + IMAGE_IDS.length) % IMAGE_IDS.length;
+    navigateTo(next);
+  }
+
+  function navigateTo(index) {
+    currentIndex = index;
+    loadLbImage(index);
+    /* restart slideshow timer on manual navigation */
+    if (isSlideshow) {
+      clearInterval(slideshowTimer);
+      startSlideshowTimer();
+    }
+  }
+
+  function updateThumbActive(index) {
+    document.querySelectorAll('.lb-thumb').forEach((t, i) => {
+      t.classList.toggle('active', i === index);
+    });
+    /* scroll active thumb into view */
+    const active = document.getElementById(`thumb-${index}`);
+    if (active) active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }
+
+  /* ── SLIDESHOW ───────────────────────────────────────────── */
+  function toggleSlideshow() {
+    if (isSlideshow) {
+      stopSlideshow();
+    } else {
+      /* if lightbox not open, open it first */
+      if (!document.getElementById('lightbox').classList.contains('open')) {
+        openLightbox(0);
+      }
+      startSlideshow();
+    }
+  }
+
+  function startSlideshow() {
+    isSlideshow = true;
+    const btn1 = document.getElementById('lbSlideshowBtn');
+    const btn2 = document.getElementById('slideshowToggleTop');
+    if (btn1) btn1.classList.add('active');
+    if (btn2) btn2.classList.add('active');
+    const prog = document.getElementById('lbProgress');
+    prog.classList.add('running');
+    startSlideshowTimer();
+  }
+
+  function startSlideshowTimer() {
+    const prog = document.getElementById('lbProgress');
+    prog.style.transition = 'none';
+    prog.style.width = '0%';
+    /* force reflow */
+    prog.offsetHeight;
+    prog.style.transition = `width ${SLIDESHOW_INTERVAL_MS}ms linear`;
+    prog.style.width = '100%';
+
+    slideshowTimer = setInterval(() => {
+      lbNavigate(1);
+      /* reset bar */
+      prog.style.transition = 'none';
+      prog.style.width = '0%';
+      prog.offsetHeight;
+      prog.style.transition = `width ${SLIDESHOW_INTERVAL_MS}ms linear`;
+      prog.style.width = '100%';
+    }, SLIDESHOW_INTERVAL_MS);
+  }
+
+  function stopSlideshow() {
+    isSlideshow = false;
+    clearInterval(slideshowTimer);
+    const btn1 = document.getElementById('lbSlideshowBtn');
+    const btn2 = document.getElementById('slideshowToggleTop');
+    if (btn1) btn1.classList.remove('active');
+    if (btn2) btn2.classList.remove('active');
+    const prog = document.getElementById('lbProgress');
+    prog.style.transition = 'none';
+    prog.style.width = '0%';
+    prog.classList.remove('running');
+  }
+
+  /* ── DOWNLOAD ────────────────────────────────────────────── */
+  function downloadSingle(e, id, index) {
+    e.stopPropagation();
+    triggerDownload(id, `photo-${String(index + 1).padStart(2, '0')}.jpg`);
+    showToast(`Downloading Photo ${index + 1}…`);
+  }
+
+  function downloadCurrent() {
+    const id = IMAGE_IDS[currentIndex];
+    triggerDownload(id, `photo-${String(currentIndex + 1).padStart(2, '0')}.jpg`);
+    showToast(`Downloading Photo ${currentIndex + 1}…`);
+  }
+
+//   function downloadAll() {
+//     showToast('Starting download of all photos…');
+//     IMAGE_IDS.forEach((id, i) => {
+//       setTimeout(() => {
+//         triggerDownload(id, `photo-${String(i + 1).padStart(2, '0')}.jpg`);
+//       }, i * 600);   /* stagger to avoid browser blocking */
+//     });
+//   }
+
+  function triggerDownload(fileId, filename) {
+    /* Use Google Drive direct download link */
+    const url  = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    const link = document.createElement('a');
+    link.href     = url;
+    link.download = filename;
+    link.target   = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  /* ── TOAST ───────────────────────────────────────────────── */
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  /* ── KEYBOARD NAVIGATION ─────────────────────────────────── */
+  document.addEventListener('keydown', (e) => {
+    const lb = document.getElementById('lightbox');
+    if (!lb.classList.contains('open')) return;
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown':  lbNavigate(1);  break;
+      case 'ArrowLeft':  case 'ArrowUp':    lbNavigate(-1); break;
+      case 'Escape':                         closeLightbox(); break;
+      case ' ':  e.preventDefault(); toggleSlideshow(); break;
+    }
+  });
+
+  /* ── TOUCH SWIPE ─────────────────────────────────────────── */
+  const lb = document.getElementById('lightbox');
+  lb.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 50) {
+      lbNavigate(diff > 0 ? 1 : -1);
+    }
+  }, { passive: true });
+
+  /* ── MOBILE NAV ──────────────────────────────────────────── */
+  document.getElementById('navToggle').addEventListener('click', () => {
+    document.getElementById('nav').classList.toggle('open');
+  });
+
+  /* ── HEADER SHADOW ON SCROLL ─────────────────────────────── */
+  const siteHeader = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    siteHeader.style.background = window.scrollY > 40
+      ? 'rgba(14,14,13,0.97)'
+      : 'rgba(14,14,13,0.85)';
+  });
+
+  /* ── SHAKE ANIMATION (login error) ──────────────────────── */
+  const shakeStyle = document.createElement('style');
+  shakeStyle.textContent = `
+    @keyframes shake {
+      0%,100%{ transform: translateX(0); }
+      20%    { transform: translateX(-8px); }
+      40%    { transform: translateX(8px); }
+      60%    { transform: translateX(-6px); }
+      80%    { transform: translateX(6px); }
+    }
+  `;
+  document.head.appendChild(shakeStyle);
+  </script>
+
+</body>
+</html>
